@@ -5,16 +5,14 @@ interface Props {
   phrases: Phrase[];
   onPlay: (phrase: Phrase) => void;
   onMerge: (id: number) => void;
-  onUnmerge: (id: number) => void;
+  onSplit: (id: number) => void;
   onToggleExclude: (id: number) => void;
 }
 
-export function PhraseList({ phrases, onPlay, onMerge, onUnmerge, onToggleExclude }: Props) {
+export function PhraseList({ phrases, onPlay, onMerge, onSplit, onToggleExclude }: Props) {
   if (phrases.length === 0) {
     return <p className="text-gray-600">No phrases detected yet.</p>;
   }
-
-  const isMergedWithNext = (i: number) => i < phrases.length - 1 && phrases[i].groupId === phrases[i + 1].groupId;
 
   return (
     <div className="mb-6">
@@ -28,9 +26,8 @@ export function PhraseList({ phrases, onPlay, onMerge, onUnmerge, onToggleExclud
             isLast={i === phrases.length - 1}
             onPlay={onPlay}
             onMerge={onMerge}
-            onUnmerge={onUnmerge}
+            onSplit={onSplit}
             onToggleExclude={onToggleExclude}
-            isMergedWithNext={isMergedWithNext(i)}
           />
         ))}
       </div>

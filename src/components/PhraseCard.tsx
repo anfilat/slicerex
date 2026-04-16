@@ -6,21 +6,11 @@ interface Props {
   isLast: boolean;
   onPlay: (phrase: Phrase) => void;
   onMerge: (id: number) => void;
-  onUnmerge: (id: number) => void;
+  onSplit: (id: number) => void;
   onToggleExclude: (id: number) => void;
-  isMergedWithNext: boolean;
 }
 
-export function PhraseCard({
-  phrase,
-  index,
-  isLast,
-  onPlay,
-  onMerge,
-  onUnmerge,
-  onToggleExclude,
-  isMergedWithNext,
-}: Props) {
+export function PhraseCard({ phrase, index, isLast, onPlay, onMerge, onSplit, onToggleExclude }: Props) {
   const formatTime = (t: number) => {
     const min = Math.floor(t / 60);
     const sec = Math.floor(t % 60);
@@ -51,13 +41,20 @@ export function PhraseCard({
       </div>
       {!isLast && (
         <button
-          onClick={() => (isMergedWithNext ? onUnmerge(phrase.id) : onMerge(phrase.id))}
-          className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded"
-          title={isMergedWithNext ? 'Unmerge' : 'Merge with next'}
+          onClick={() => onMerge(phrase.id)}
+          className="px-2 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded"
+          title="Merge with next phrase"
         >
-          {isMergedWithNext ? 'Unmerge' : 'Merge ↓'}
+          Merge ↓
         </button>
       )}
+      <button
+        onClick={() => onSplit(phrase.id)}
+        className="px-2 py-1 text-xs bg-green-100 hover:bg-green-200 text-green-700 rounded"
+        title="Split into two phrases"
+      >
+        Split ✂
+      </button>
       <label className="flex items-center gap-1 text-xs cursor-pointer">
         <input type="checkbox" checked={phrase.excluded} onChange={() => onToggleExclude(phrase.id)} />
         Exclude

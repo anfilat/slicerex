@@ -101,12 +101,53 @@ export default function App() {
   const handleMerge = (id: number) => {
     const idx = phrases.findIndex(p => p.id === id);
     if (idx === -1 || idx === phrases.length - 1) return;
-    const targetGroupId = phrases[idx + 1].groupId;
-    setPhrases(phrases.map(p => (p.groupId === targetGroupId ? { ...p, groupId: phrases[idx].groupId } : p)));
+
+    const current = phrases[idx];
+    const next = phrases[idx + 1];
+
+    // Create merged phrase
+    const merged: Phrase = {
+      id: Math.max(...phrases.map(p => p.id)) + 1,
+      startTime: current.startTime,
+      endTime: next.endTime,
+      groupId: Math.max(...phrases.map(p => p.id)) + 1,
+      excluded: current.excluded && next.excluded,
+    };
+
+    // Remove both phrases and add merged one
+    const newPhrases = [...phrases];
+    newPhrases.splice(idx, 2, merged);
+    setPhrases(newPhrases);
   };
 
-  const handleUnmerge = (id: number) => {
-    setPhrases(phrases.map(p => (p.id === id + 1 ? { ...p, groupId: p.id } : p)));
+  const handleSplit = (id: number) => {
+    const idx = phrases.findIndex(p => p.id === id);
+    if (idx === -1) return;
+
+    const phrase = phrases[idx];
+    const midPoint = (phrase.startTime + phrase.endTime) / 2;
+
+    // Create two new phrases
+    const maxId = Math.max(...phrases.map(p => p.id));
+    const first: Phrase = {
+      ...phrase,
+      id: maxId + 1,
+      groupId: maxId + 1,
+      startTime: phrase.startTime,
+      endTime: midPoint,
+    };
+    const second: Phrase = {
+      ...phrase,
+      id: maxId + 2,
+      groupId: maxId + 2,
+      startTime: midPoint,
+      endTime: phrase.endTime,
+    };
+
+    // Replace original phrase with two new ones
+    const newPhrases = [...phrases];
+    newPhrases.splice(idx, 1, first, second);
+    setPhrases(newPhrases);
   };
 
   const handleToggleExclude = (id: number) => {
@@ -163,7 +204,7 @@ export default function App() {
               phrases={phrases}
               onPlay={handlePlay}
               onMerge={handleMerge}
-              onUnmerge={handleUnmerge}
+              onSplit={handleSplit}
               onToggleExclude={handleToggleExclude}
             />
           )}
