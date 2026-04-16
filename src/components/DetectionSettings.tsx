@@ -15,6 +15,29 @@ export function DetectionSettings({ settings, onChange, onDetect, disabled }: Pr
     <div className="mb-6 p-4 bg-gray-800 rounded-lg">
       <h2 className="text-lg font-semibold mb-3">Detection Settings</h2>
       <div className="grid grid-cols-2 gap-3 mb-4">
+        <label className="flex items-center gap-2 text-sm col-span-2 mb-2">
+          Detection method:
+          <select
+            value={settings.method}
+            onChange={e => update({ method: e.target.value as DetectionSettings['method'] })}
+            className="px-2 py-1 bg-gray-700 rounded"
+          >
+            <option value="silence">Silence detection</option>
+            <option value="whisper">Whisper transcription</option>
+            <option value="both">Both</option>
+          </select>
+          {settings.method !== 'silence' && (
+            <select
+              value={settings.whisperModel}
+              onChange={e => update({ whisperModel: e.target.value as DetectionSettings['whisperModel'] })}
+              className="px-2 py-1 bg-gray-700 rounded ml-2"
+            >
+              <option value="tiny">Tiny (39MB, fast)</option>
+              <option value="base">Base (74MB, balanced)</option>
+              <option value="small">Small (244MB, accurate)</option>
+            </select>
+          )}
+        </label>
         <label className="flex flex-col text-sm">
           Silence threshold (dB)
           <input
