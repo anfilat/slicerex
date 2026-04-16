@@ -30,6 +30,7 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
       height: 128,
       barWidth: 2,
       barGap: 1,
+      interact: false,
     });
 
     const regionsPlugin = ws.registerPlugin(RegionsPlugin.create());
