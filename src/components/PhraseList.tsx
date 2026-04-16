@@ -11,7 +11,7 @@ interface Props {
 
 export function PhraseList({ phrases, onPlay, onMerge, onUnmerge, onToggleExclude }: Props) {
   if (phrases.length === 0) {
-    return <p className="text-gray-500">No phrases detected yet.</p>;
+    return <p className="text-gray-600">No phrases detected yet.</p>;
   }
 
   const isMergedWithNext = (i: number) => i < phrases.length - 1 && phrases[i].groupId === phrases[i + 1].groupId;

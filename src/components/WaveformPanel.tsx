@@ -87,7 +87,7 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
 
   return (
     <div className="mb-6">
-      <div ref={containerRef} className="bg-gray-800 rounded-lg overflow-hidden" />
+      <div ref={containerRef} className="bg-white rounded-lg border border-gray-200 overflow-hidden" />
     </div>
   );
 }

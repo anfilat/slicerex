@@ -9,7 +9,7 @@ export function ExportPanel({ onExport, progress }: Props) {
   const isExporting = progress.status === 'encoding';
 
   return (
-    <div className="mb-6 p-4 bg-gray-800 rounded-lg">
+    <div className="mb-6 p-4 bg-white rounded-lg border border-gray-200">
       <div className="flex items-center gap-4">
         <button
           onClick={onExport}
@@ -20,13 +20,13 @@ export function ExportPanel({ onExport, progress }: Props) {
         </button>
         {isExporting && (
           <>
-            <div className="flex-1 h-2 bg-gray-700 rounded overflow-hidden">
+            <div className="flex-1 h-2 bg-gray-200 rounded overflow-hidden">
               <div
                 className="h-full bg-purple-600 transition-all"
                 style={{ width: `${(progress.current / progress.total) * 100}%` }}
               />
             </div>
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-gray-600">
               {progress.current}/{progress.total}
             </span>
           </>

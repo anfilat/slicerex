@@ -33,7 +33,7 @@ export function AudioUploader({ engine, onLoaded }: Props) {
       </button>
       <input ref={inputRef} type="file" accept="audio/*" onChange={handleFile} className="hidden" />
       {engine.buffer && (
-        <span className="ml-3 text-gray-400">
+        <span className="ml-3 text-gray-600">
           {engine.fileName} ({Math.round(engine.duration)}s)
         </span>
       )}
