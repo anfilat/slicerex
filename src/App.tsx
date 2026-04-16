@@ -4,6 +4,7 @@ import { detectPhrases } from './audio/silenceDetection'
 import { Phrase, DEFAULT_SETTINGS, DetectionSettings as DetectionSettingsType } from './types'
 import { AudioUploader } from './components/AudioUploader'
 import { DetectionSettings } from './components/DetectionSettings'
+import { PhraseList } from './components/PhraseList'
 
 export default function App() {
   const engineRef = useRef(new AudioEngine())
@@ -24,6 +25,31 @@ export default function App() {
     setPhrases(result)
   }
 
+  const handlePlay = async (phrase: Phrase) => {
+    await engineRef.current.playSegment(phrase.startTime, phrase.endTime)
+  }
+
+  const handleMerge = (id: number) => {
+    const idx = phrases.findIndex(p => p.id === id)
+    if (idx === -1 || idx === phrases.length - 1) return
+    const targetGroupId = phrases[idx + 1].groupId
+    setPhrases(phrases.map(p =>
+      p.groupId === targetGroupId ? { ...p, groupId: phrases[idx].groupId } : p
+    ))
+  }
+
+  const handleUnmerge = (id: number) => {
+    setPhrases(phrases.map(p =>
+      p.id === id + 1 ? { ...p, groupId: p.id } : p
+    ))
+  }
+
+  const handleToggleExclude = (id: number) => {
+    setPhrases(phrases.map(p =>
+      p.id === id ? { ...p, excluded: !p.excluded } : p
+    ))
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6 max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Slicerex</h1>
@@ -39,9 +65,15 @@ export default function App() {
             onDetect={handleDetect}
             disabled={!audioLoaded}
           />
-          <p className="text-gray-400">
-            Audio loaded ({phrases.length} phrases detected)
-          </p>
+          {phrases.length > 0 && (
+            <PhraseList
+              phrases={phrases}
+              onPlay={handlePlay}
+              onMerge={handleMerge}
+              onUnmerge={handleUnmerge}
+              onToggleExclude={handleToggleExclude}
+            />
+          )}
         </>
       )}
     </div>
