@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { AudioEngine } from './audio/audioEngine'
 import { detectPhrases } from './audio/silenceDetection'
 import { transcribeWithWhisper } from './audio/whisperTranscription'
@@ -14,6 +14,10 @@ import { WhisperStatus } from './components/WhisperStatus'
 export default function App() {
   const engineRef = useRef(new AudioEngine())
   const [audioLoaded, setAudioLoaded] = useState(false)
+
+  useEffect(() => {
+    return () => { engineRef.current.destroy() }
+  }, [])
   const [phrases, setPhrases] = useState<Phrase[]>([])
   const [settings, setSettings] = useState<DetectionSettingsType>(DEFAULT_SETTINGS)
   const [exportProgress, setExportProgress] = useState<ExportProgress>({
@@ -137,7 +141,10 @@ export default function App() {
       <h1 className="text-2xl font-bold mb-6">Slicerex</h1>
       <AudioUploader
         engine={engineRef.current}
-        onLoaded={() => setAudioLoaded(true)}
+        onLoaded={() => {
+          setAudioLoaded(true)
+          setPhrases([])
+        }}
       />
       {audioLoaded && (
         <>
