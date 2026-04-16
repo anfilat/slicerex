@@ -1,5 +1,5 @@
-import { Phrase } from "../types";
-import { PhraseCard } from "./PhraseCard";
+import { Phrase } from '../types';
+import { PhraseCard } from './PhraseCard';
 
 interface Props {
   phrases: Phrase[];
@@ -14,8 +14,7 @@ export function PhraseList({ phrases, onPlay, onMerge, onUnmerge, onToggleExclud
     return <p className="text-gray-500">No phrases detected yet.</p>;
   }
 
-  const isMergedWithNext = (i: number) =>
-    i < phrases.length - 1 && phrases[i].groupId === phrases[i + 1].groupId;
+  const isMergedWithNext = (i: number) => i < phrases.length - 1 && phrases[i].groupId === phrases[i + 1].groupId;
 
   return (
     <div className="mb-6">

@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { AudioEngine } from "../audio/audioEngine";
+import { useRef, useState } from 'react';
+import { AudioEngine } from '../audio/audioEngine';
 
 interface Props {
   engine: AudioEngine;
@@ -29,7 +29,7 @@ export function AudioUploader({ engine, onLoaded }: Props) {
         disabled={loading}
         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white disabled:opacity-50"
       >
-        {loading ? "Loading..." : "Upload audio file"}
+        {loading ? 'Loading...' : 'Upload audio file'}
       </button>
       <input ref={inputRef} type="file" accept="audio/*" onChange={handleFile} className="hidden" />
       {engine.buffer && (

@@ -1,7 +1,7 @@
-import { Phrase } from "../types";
+import { Phrase } from '../types';
 
 export interface WhisperProgress {
-  status: "loading" | "transcribing" | "done";
+  status: 'loading' | 'transcribing' | 'done';
   progress: number; // 0-100
 }
 
@@ -51,11 +51,11 @@ export interface WhisperProgress {
 export async function transcribeWithWhisper(
   audioData: Float32Array,
   sampleRate: number,
-  model: "tiny" | "base" | "small",
-  onProgress: (p: WhisperProgress) => void,
+  model: 'tiny' | 'base' | 'small',
+  onProgress: (p: WhisperProgress) => void
 ): Promise<{ phrases: Phrase[] }> {
   // Report loading progress
-  onProgress({ status: "loading", progress: 0 });
+  onProgress({ status: 'loading', progress: 0 });
 
   // STUB: Throw error indicating Whisper is not yet implemented
   // Use parameters to avoid unused variable warnings
@@ -64,12 +64,12 @@ export async function transcribeWithWhisper(
   void model;
 
   throw new Error(
-    "Whisper transcription is not yet available. " +
-      "This is a placeholder implementation. " +
-      "To enable Whisper transcription, integrate one of the following packages:\n" +
-      "  - @xenova/transformers (recommended)\n" +
-      "  - @remotion/whisper-web\n\n" +
-      "See implementation notes in src/audio/whisperTranscription.ts for research findings.",
+    'Whisper transcription is not yet available. ' +
+      'This is a placeholder implementation. ' +
+      'To enable Whisper transcription, integrate one of the following packages:\n' +
+      '  - @xenova/transformers (recommended)\n' +
+      '  - @remotion/whisper-web\n\n' +
+      'See implementation notes in src/audio/whisperTranscription.ts for research findings.'
   );
 
   /* Implementation example for @xenova/transformers (when ready):

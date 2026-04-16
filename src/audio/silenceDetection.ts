@@ -1,4 +1,4 @@
-import { Phrase } from "../types";
+import { Phrase } from '../types';
 
 interface DetectionConfig {
   silenceThresholdDb: number;
@@ -7,11 +7,7 @@ interface DetectionConfig {
   padding: number; // ms
 }
 
-export function detectPhrases(
-  audioData: Float32Array,
-  sampleRate: number,
-  config: DetectionConfig,
-): Phrase[] {
+export function detectPhrases(audioData: Float32Array, sampleRate: number, config: DetectionConfig): Phrase[] {
   const windowSize = Math.floor((50 / 1000) * sampleRate);
   const hopSize = Math.floor((10 / 1000) * sampleRate);
 
@@ -70,8 +66,8 @@ export function detectPhrases(
   let phraseId = 0;
 
   const phrases: Phrase[] = boundaries
-    .filter((b) => b.end - b.start >= minPhraseSec)
-    .map((b) => {
+    .filter(b => b.end - b.start >= minPhraseSec)
+    .map(b => {
       const paddedStart = Math.max(0, b.start - paddingSec);
       const paddedEnd = Math.min(totalDuration, b.end + paddingSec);
       const phrase: Phrase = {

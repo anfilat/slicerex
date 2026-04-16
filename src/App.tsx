@@ -1,20 +1,15 @@
-import { useState, useRef, useEffect } from "react";
-import { AudioEngine } from "./audio/audioEngine";
-import { detectPhrases } from "./audio/silenceDetection";
-import { transcribeWithWhisper } from "./audio/whisperTranscription";
-import { exportPhrases } from "./audio/exporter";
-import {
-  Phrase,
-  DEFAULT_SETTINGS,
-  DetectionSettings as DetectionSettingsType,
-  ExportProgress,
-} from "./types";
-import { AudioUploader } from "./components/AudioUploader";
-import { DetectionSettings } from "./components/DetectionSettings";
-import { PhraseList } from "./components/PhraseList";
-import { WaveformPanel } from "./components/WaveformPanel";
-import { ExportPanel } from "./components/ExportPanel";
-import { WhisperStatus } from "./components/WhisperStatus";
+import { useState, useRef, useEffect } from 'react';
+import { AudioEngine } from './audio/audioEngine';
+import { detectPhrases } from './audio/silenceDetection';
+import { transcribeWithWhisper } from './audio/whisperTranscription';
+import { exportPhrases } from './audio/exporter';
+import { Phrase, DEFAULT_SETTINGS, DetectionSettings as DetectionSettingsType, ExportProgress } from './types';
+import { AudioUploader } from './components/AudioUploader';
+import { DetectionSettings } from './components/DetectionSettings';
+import { PhraseList } from './components/PhraseList';
+import { WaveformPanel } from './components/WaveformPanel';
+import { ExportPanel } from './components/ExportPanel';
+import { WhisperStatus } from './components/WhisperStatus';
 
 export default function App() {
   const engineRef = useRef(new AudioEngine());
@@ -30,19 +25,19 @@ export default function App() {
   const [exportProgress, setExportProgress] = useState<ExportProgress>({
     current: 0,
     total: 0,
-    status: "idle",
+    status: 'idle',
   });
   const [whisperProgress, setWhisperProgress] = useState<{
-    status: "idle" | "loading" | "transcribing" | "done" | "error";
+    status: 'idle' | 'loading' | 'transcribing' | 'done' | 'error';
     progress: number;
-  }>({ status: "idle", progress: 0 });
+  }>({ status: 'idle', progress: 0 });
 
   const handleDetect = async () => {
     const engine = engineRef.current;
     if (!engine.buffer) return;
     const channelData = engine.getChannelData();
 
-    if (settings.method === "silence") {
+    if (settings.method === 'silence') {
       const result = detectPhrases(channelData, engine.buffer.sampleRate, {
         silenceThresholdDb: settings.silenceThresholdDb,
         minSilenceDuration: settings.minSilenceDuration,
@@ -50,17 +45,14 @@ export default function App() {
         padding: settings.padding,
       });
       setPhrases(result);
-    } else if (settings.method === "whisper") {
+    } else if (settings.method === 'whisper') {
       try {
-        const result = await transcribeWithWhisper(
-          channelData,
-          engine.buffer.sampleRate,
-          settings.whisperModel,
-          (p) => setWhisperProgress({ status: p.status, progress: p.progress }),
+        const result = await transcribeWithWhisper(channelData, engine.buffer.sampleRate, settings.whisperModel, p =>
+          setWhisperProgress({ status: p.status, progress: p.progress })
         );
         setPhrases(result.phrases);
       } catch {
-        setWhisperProgress({ status: "error", progress: 0 });
+        setWhisperProgress({ status: 'error', progress: 0 });
         // Fall back to silence detection on error
         const result = detectPhrases(channelData, engine.buffer.sampleRate, {
           silenceThresholdDb: settings.silenceThresholdDb,
@@ -87,17 +79,17 @@ export default function App() {
           channelData,
           engine.buffer.sampleRate,
           settings.whisperModel,
-          (p) => setWhisperProgress({ status: p.status, progress: p.progress }),
+          p => setWhisperProgress({ status: p.status, progress: p.progress })
         );
         // Enrich silence-detected phrases with transcripts
-        setPhrases((prev) =>
+        setPhrases(prev =>
           prev.map((p, i) => ({
             ...p,
             transcript: whisperResult.phrases[i]?.transcript,
-          })),
+          }))
         );
       } catch {
-        setWhisperProgress({ status: "error", progress: 0 });
+        setWhisperProgress({ status: 'error', progress: 0 });
       }
     }
   };
@@ -107,26 +99,22 @@ export default function App() {
   };
 
   const handleMerge = (id: number) => {
-    const idx = phrases.findIndex((p) => p.id === id);
+    const idx = phrases.findIndex(p => p.id === id);
     if (idx === -1 || idx === phrases.length - 1) return;
     const targetGroupId = phrases[idx + 1].groupId;
-    setPhrases(
-      phrases.map((p) =>
-        p.groupId === targetGroupId ? { ...p, groupId: phrases[idx].groupId } : p,
-      ),
-    );
+    setPhrases(phrases.map(p => (p.groupId === targetGroupId ? { ...p, groupId: phrases[idx].groupId } : p)));
   };
 
   const handleUnmerge = (id: number) => {
-    setPhrases(phrases.map((p) => (p.id === id + 1 ? { ...p, groupId: p.id } : p)));
+    setPhrases(phrases.map(p => (p.id === id + 1 ? { ...p, groupId: p.id } : p)));
   };
 
   const handleToggleExclude = (id: number) => {
-    setPhrases(phrases.map((p) => (p.id === id ? { ...p, excluded: !p.excluded } : p)));
+    setPhrases(phrases.map(p => (p.id === id ? { ...p, excluded: !p.excluded } : p)));
   };
 
   const handlePhraseBoundaryChange = (id: number, startTime: number, endTime: number) => {
-    setPhrases(phrases.map((p) => (p.id === id ? { ...p, startTime, endTime } : p)));
+    setPhrases(phrases.map(p => (p.id === id ? { ...p, startTime, endTime } : p)));
   };
 
   const handleExport = async () => {
@@ -134,18 +122,14 @@ export default function App() {
     if (!engine.buffer || phrases.length === 0) return;
 
     const audioData = engine.getChannelData();
-    setExportProgress({ current: 0, total: phrases.length, status: "encoding" });
+    setExportProgress({ current: 0, total: phrases.length, status: 'encoding' });
 
-    await exportPhrases(
-      audioData,
-      engine.buffer.sampleRate,
-      phrases,
-      engine.fileName,
-      (current, total) => setExportProgress({ current, total, status: "encoding" }),
+    await exportPhrases(audioData, engine.buffer.sampleRate, phrases, engine.fileName, (current, total) =>
+      setExportProgress({ current, total, status: 'encoding' })
     );
 
-    setExportProgress((prev) => ({ ...prev, status: "done" }));
-    setTimeout(() => setExportProgress({ current: 0, total: 0, status: "idle" }), 2000);
+    setExportProgress(prev => ({ ...prev, status: 'done' }));
+    setTimeout(() => setExportProgress({ current: 0, total: 0, status: 'idle' }), 2000);
   };
 
   return (

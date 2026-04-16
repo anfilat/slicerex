@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
-import WaveSurfer from "wavesurfer.js";
-import RegionsPlugin from "wavesurfer.js/dist/plugins/regions.js";
-import { Phrase } from "../types";
-import { AudioEngine } from "../audio/audioEngine";
+import { useEffect, useRef } from 'react';
+import WaveSurfer from 'wavesurfer.js';
+import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.js';
+import { Phrase } from '../types';
+import { AudioEngine } from '../audio/audioEngine';
 
 interface Props {
   engine: AudioEngine;
@@ -29,8 +29,8 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
 
     const ws = WaveSurfer.create({
       container: containerRef.current,
-      waveColor: "#6b7280",
-      progressColor: "#3b82f6",
+      waveColor: '#6b7280',
+      progressColor: '#3b82f6',
       height: 128,
       barWidth: 2,
       barGap: 1,
@@ -59,12 +59,12 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
     const existingRegions = rp.getRegions();
     existingRegions.forEach((r: any) => r.remove());
 
-    const colors = ["#3b82f633", "#10b98133", "#f59e0b33", "#ef444433", "#8b5cf633"];
+    const colors = ['#3b82f633', '#10b98133', '#f59e0b33', '#ef444433', '#8b5cf633'];
     phrases.forEach((phrase, i) => {
       rp.addRegion({
         start: phrase.startTime,
         end: phrase.endTime,
-        color: phrase.excluded ? "rgba(107, 114, 128, 0.2)" : colors[i % colors.length],
+        color: phrase.excluded ? 'rgba(107, 114, 128, 0.2)' : colors[i % colors.length],
         drag: false,
         resize: true,
         content: `#${i + 1}`,
@@ -86,8 +86,8 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
       onPhraseBoundaryChange(phrase.id, region.start, region.end);
     };
 
-    rp.on("region-updated", handler);
-    return () => rp.un("region-updated", handler);
+    rp.on('region-updated', handler);
+    return () => rp.un('region-updated', handler);
   }, [phrases, onPhraseBoundaryChange]);
 
   return (

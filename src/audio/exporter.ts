@@ -1,12 +1,12 @@
-import { Phrase } from "../types";
-import { encodePhraseToMp3 } from "./mp3Encoder";
+import { Phrase } from '../types';
+import { encodePhraseToMp3 } from './mp3Encoder';
 
 export async function exportPhrases(
   audioData: Float32Array,
   sampleRate: number,
   phrases: Phrase[],
   filePrefix: string,
-  onProgress: (current: number, total: number) => void,
+  onProgress: (current: number, total: number) => void
 ): Promise<void> {
   // Build export groups: adjacent non-excluded phrases with same groupId
   const exportGroups: Phrase[][] = [];
@@ -37,22 +37,22 @@ export async function exportPhrases(
     const mergedPhrase: Phrase = {
       ...group[0],
       id: group[0].id,
-      startTime: Math.min(...group.map((p) => p.startTime)),
-      endTime: Math.max(...group.map((p) => p.endTime)),
+      startTime: Math.min(...group.map(p => p.startTime)),
+      endTime: Math.max(...group.map(p => p.endTime)),
     };
 
     const blob = await encodePhraseToMp3(audioData, sampleRate, mergedPhrase);
 
-    const num = String(i + 1).padStart(2, "0");
+    const num = String(i + 1).padStart(2, '0');
     const fileName = `${filePrefix}_${num}.mp3`;
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = fileName;
     a.click();
     URL.revokeObjectURL(url);
 
     onProgress(i + 1, total);
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 200));
   }
 }

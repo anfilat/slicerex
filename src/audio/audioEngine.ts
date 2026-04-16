@@ -2,7 +2,7 @@ export class AudioEngine {
   private audioContext: AudioContext | null = null;
   private audioBuffer: AudioBuffer | null = null;
   private sourceNode: AudioBufferSourceNode | null = null;
-  private _fileName: string = "";
+  private _fileName: string = '';
 
   get fileName(): string {
     return this._fileName;
@@ -18,7 +18,7 @@ export class AudioEngine {
 
   async loadFile(file: File): Promise<AudioBuffer> {
     this.stop();
-    this._fileName = file.name.replace(/\.[^.]+$/, "");
+    this._fileName = file.name.replace(/\.[^.]+$/, '');
 
     if (!this.audioContext) {
       this.audioContext = new AudioContext();
@@ -30,7 +30,7 @@ export class AudioEngine {
   }
 
   getChannelData(): Float32Array {
-    if (!this.audioBuffer) throw new Error("No audio loaded");
+    if (!this.audioBuffer) throw new Error('No audio loaded');
     if (this.audioBuffer.numberOfChannels === 1) {
       return this.audioBuffer.getChannelData(0);
     }
@@ -44,7 +44,7 @@ export class AudioEngine {
   }
 
   playSegment(start: number, end: number): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       this.stop();
       if (!this.audioContext || !this.audioBuffer) return resolve();
 
@@ -96,10 +96,10 @@ export class AudioEngine {
       }
     };
 
-    writeString(0, "RIFF");
+    writeString(0, 'RIFF');
     view.setUint32(4, totalLength - 8, true);
-    writeString(8, "WAVE");
-    writeString(12, "fmt ");
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
     view.setUint32(16, 16, true);
     view.setUint16(20, 1, true);
     view.setUint16(22, numChannels, true);
@@ -107,7 +107,7 @@ export class AudioEngine {
     view.setUint32(28, sampleRate * blockAlign, true);
     view.setUint16(32, blockAlign, true);
     view.setUint16(34, bitDepth, true);
-    writeString(36, "data");
+    writeString(36, 'data');
     view.setUint32(40, dataLength, true);
 
     const channels: Float32Array[] = [];
@@ -124,7 +124,7 @@ export class AudioEngine {
       }
     }
 
-    return new Blob([arrayBuffer], { type: "audio/wav" });
+    return new Blob([arrayBuffer], { type: 'audio/wav' });
   }
 
   destroy(): void {

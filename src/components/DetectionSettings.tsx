@@ -1,4 +1,4 @@
-import type { DetectionSettings } from "../types";
+import type { DetectionSettings } from '../types';
 
 interface Props {
   settings: DetectionSettings;
@@ -18,19 +18,17 @@ export function DetectionSettings({ settings, onChange, onDetect, disabled }: Pr
           Detection method:
           <select
             value={settings.method}
-            onChange={(e) => update({ method: e.target.value as DetectionSettings["method"] })}
+            onChange={e => update({ method: e.target.value as DetectionSettings['method'] })}
             className="px-2 py-1 bg-gray-700 rounded"
           >
             <option value="silence">Silence detection</option>
             <option value="whisper">Whisper transcription</option>
             <option value="both">Both</option>
           </select>
-          {settings.method !== "silence" && (
+          {settings.method !== 'silence' && (
             <select
               value={settings.whisperModel}
-              onChange={(e) =>
-                update({ whisperModel: e.target.value as DetectionSettings["whisperModel"] })
-              }
+              onChange={e => update({ whisperModel: e.target.value as DetectionSettings['whisperModel'] })}
               className="px-2 py-1 bg-gray-700 rounded ml-2"
             >
               <option value="tiny">Tiny (39MB, fast)</option>
@@ -44,7 +42,7 @@ export function DetectionSettings({ settings, onChange, onDetect, disabled }: Pr
           <input
             type="number"
             value={settings.silenceThresholdDb}
-            onChange={(e) => update({ silenceThresholdDb: Number(e.target.value) })}
+            onChange={e => update({ silenceThresholdDb: Number(e.target.value) })}
             className="mt-1 px-2 py-1 bg-gray-700 rounded"
           />
         </label>
@@ -53,7 +51,7 @@ export function DetectionSettings({ settings, onChange, onDetect, disabled }: Pr
           <input
             type="number"
             value={settings.minSilenceDuration}
-            onChange={(e) => update({ minSilenceDuration: Number(e.target.value) })}
+            onChange={e => update({ minSilenceDuration: Number(e.target.value) })}
             className="mt-1 px-2 py-1 bg-gray-700 rounded"
           />
         </label>
@@ -62,7 +60,7 @@ export function DetectionSettings({ settings, onChange, onDetect, disabled }: Pr
           <input
             type="number"
             value={settings.minPhraseDuration}
-            onChange={(e) => update({ minPhraseDuration: Number(e.target.value) })}
+            onChange={e => update({ minPhraseDuration: Number(e.target.value) })}
             className="mt-1 px-2 py-1 bg-gray-700 rounded"
           />
         </label>
@@ -71,7 +69,7 @@ export function DetectionSettings({ settings, onChange, onDetect, disabled }: Pr
           <input
             type="number"
             value={settings.padding}
-            onChange={(e) => update({ padding: Number(e.target.value) })}
+            onChange={e => update({ padding: Number(e.target.value) })}
             className="mt-1 px-2 py-1 bg-gray-700 rounded"
           />
         </label>

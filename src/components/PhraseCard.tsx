@@ -1,4 +1,4 @@
-import { Phrase } from "../types";
+import { Phrase } from '../types';
 
 interface Props {
   phrase: Phrase;
@@ -25,14 +25,12 @@ export function PhraseCard({
     const min = Math.floor(t / 60);
     const sec = Math.floor(t % 60);
     const ms = Math.floor((t % 1) * 10);
-    return `${min}:${String(sec).padStart(2, "0")}.${ms}`;
+    return `${min}:${String(sec).padStart(2, '0')}.${ms}`;
   };
 
   return (
     <div
-      className={`flex items-center gap-3 p-3 rounded ${
-        phrase.excluded ? "bg-gray-800/50 opacity-50" : "bg-gray-800"
-      }`}
+      className={`flex items-center gap-3 p-3 rounded ${phrase.excluded ? 'bg-gray-800/50 opacity-50' : 'bg-gray-800'}`}
     >
       <button
         onClick={() => onPlay(phrase)}
@@ -47,29 +45,21 @@ export function PhraseCard({
           <span className="font-mono text-xs text-gray-400">
             {formatTime(phrase.startTime)} – {formatTime(phrase.endTime)}
           </span>
-          <span className="text-xs text-gray-500">
-            ({(phrase.endTime - phrase.startTime).toFixed(1)}s)
-          </span>
+          <span className="text-xs text-gray-500">({(phrase.endTime - phrase.startTime).toFixed(1)}s)</span>
         </div>
-        {phrase.transcript && (
-          <p className="text-sm text-gray-300 mt-1 truncate">"{phrase.transcript}"</p>
-        )}
+        {phrase.transcript && <p className="text-sm text-gray-300 mt-1 truncate">"{phrase.transcript}"</p>}
       </div>
       {!isLast && (
         <button
           onClick={() => (isMergedWithNext ? onUnmerge(phrase.id) : onMerge(phrase.id))}
           className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded"
-          title={isMergedWithNext ? "Unmerge" : "Merge with next"}
+          title={isMergedWithNext ? 'Unmerge' : 'Merge with next'}
         >
-          {isMergedWithNext ? "Unmerge" : "Merge ↓"}
+          {isMergedWithNext ? 'Unmerge' : 'Merge ↓'}
         </button>
       )}
       <label className="flex items-center gap-1 text-xs cursor-pointer">
-        <input
-          type="checkbox"
-          checked={phrase.excluded}
-          onChange={() => onToggleExclude(phrase.id)}
-        />
+        <input type="checkbox" checked={phrase.excluded} onChange={() => onToggleExclude(phrase.id)} />
         Exclude
       </label>
     </div>

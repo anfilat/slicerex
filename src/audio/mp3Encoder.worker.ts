@@ -1,7 +1,7 @@
 self.onmessage = async (e: MessageEvent) => {
   const { audioData, sampleRate, startSample, endSample } = e.data;
 
-  const lamejs = await import("lamejs");
+  const lamejs = await import('lamejs');
   const encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
 
   const segment = audioData.slice(startSample, endSample);
@@ -23,6 +23,6 @@ self.onmessage = async (e: MessageEvent) => {
   const mp3buf = encoder.flush();
   if (mp3buf.length > 0) mp3Chunks.push(mp3buf);
 
-  const blob = new Blob(mp3Chunks as BlobPart[], { type: "audio/mp3" });
+  const blob = new Blob(mp3Chunks as BlobPart[], { type: 'audio/mp3' });
   self.postMessage({ blob });
 };
