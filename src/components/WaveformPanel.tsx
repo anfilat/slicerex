@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.js';
 import { Phrase } from '../types';
@@ -14,6 +14,7 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
   const containerRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
   const regionsPluginRef = useRef<any>(null);
+  const [isReady, setIsReady] = useState(false);
 
   // Initialize WaveSurfer once when we have audio data
   useEffect(() => {
@@ -34,12 +35,19 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
     const regionsPlugin = ws.registerPlugin(RegionsPlugin.create());
     wsRef.current = ws;
     regionsPluginRef.current = regionsPlugin;
+    setIsReady(false);
 
     const loadPromise = ws.load('', [channelData], duration).catch(() => {});
+
+    // Mark as ready after audio is loaded
+    loadPromise.then(() => {
+      setIsReady(true);
+    });
 
     return () => {
       wsRef.current = null;
       regionsPluginRef.current = null;
+      setIsReady(false);
       // Wait for load to settle before destroying to avoid AbortError from
       // the media element aborting an in-progress load during React StrictMode cleanup.
       loadPromise.then(() => ws.destroy());
@@ -49,7 +57,7 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
   // Sync regions with phrases
   useEffect(() => {
     const rp = regionsPluginRef.current;
-    if (!rp) return;
+    if (!rp || !isReady) return;
 
     const existingRegions = rp.getRegions();
     existingRegions.forEach((r: any) => r.remove());
@@ -65,7 +73,7 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
         content: `#${i + 1}`,
       });
     });
-  }, [phrases]);
+  }, [phrases, isReady]);
 
   // Handle region resize
   useEffect(() => {
