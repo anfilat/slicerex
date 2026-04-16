@@ -14,18 +14,13 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
   const containerRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
   const regionsPluginRef = useRef<any>(null);
-  const wavBlobRef = useRef<Blob | null>(null);
 
-  // Create WAV blob when engine buffer changes
+  // Initialize WaveSurfer once when we have audio data
   useEffect(() => {
-    if (engine.buffer) {
-      wavBlobRef.current = engine.audioBufferToWav(engine.buffer);
-    }
-  }, [engine.buffer]);
+    if (!containerRef.current || !engine.buffer) return;
 
-  // Initialize WaveSurfer once when we have a WAV blob
-  useEffect(() => {
-    if (!containerRef.current || !wavBlobRef.current) return;
+    const channelData = engine.getChannelData();
+    const duration = engine.buffer.duration;
 
     const ws = WaveSurfer.create({
       container: containerRef.current,
@@ -40,16 +35,16 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
     wsRef.current = ws;
     regionsPluginRef.current = regionsPlugin;
 
-    const url = URL.createObjectURL(wavBlobRef.current);
-    ws.load(url);
+    const loadPromise = ws.load('', [channelData], duration).catch(() => {});
 
     return () => {
-      ws.destroy();
       wsRef.current = null;
       regionsPluginRef.current = null;
-      URL.revokeObjectURL(url);
+      // Wait for load to settle before destroying to avoid AbortError from
+      // the media element aborting an in-progress load during React StrictMode cleanup.
+      loadPromise.then(() => ws.destroy());
     };
-  }, [wavBlobRef.current]);
+  }, [engine.buffer]);
 
   // Sync regions with phrases
   useEffect(() => {
