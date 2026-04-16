@@ -5,6 +5,7 @@ import { Phrase, DEFAULT_SETTINGS, DetectionSettings as DetectionSettingsType } 
 import { AudioUploader } from './components/AudioUploader'
 import { DetectionSettings } from './components/DetectionSettings'
 import { PhraseList } from './components/PhraseList'
+import { WaveformPanel } from './components/WaveformPanel'
 
 export default function App() {
   const engineRef = useRef(new AudioEngine())
@@ -50,6 +51,12 @@ export default function App() {
     ))
   }
 
+  const handlePhraseBoundaryChange = (id: number, startTime: number, endTime: number) => {
+    setPhrases(phrases.map(p =>
+      p.id === id ? { ...p, startTime, endTime } : p
+    ))
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6 max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Slicerex</h1>
@@ -65,6 +72,13 @@ export default function App() {
             onDetect={handleDetect}
             disabled={!audioLoaded}
           />
+          {phrases.length > 0 && (
+            <WaveformPanel
+              engine={engineRef.current}
+              phrases={phrases}
+              onPhraseBoundaryChange={handlePhraseBoundaryChange}
+            />
+          )}
           {phrases.length > 0 && (
             <PhraseList
               phrases={phrases}
