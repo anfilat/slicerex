@@ -46,3 +46,7 @@ Browser-based audio phrase splitter. No backend — everything runs client-side.
 ## Tech Stack
 
 React 19, TypeScript 6, Vite 8, Tailwind CSS 4, WaveSurfer.js 7, lamejs, Vitest 4, oxlint, oxfmt
+
+## Tests
+
+There is a test audio file at test/test_audio.mp3
