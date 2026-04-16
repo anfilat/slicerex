@@ -1,17 +1,22 @@
 import { useState, useRef } from 'react'
 import { AudioEngine } from './audio/audioEngine'
 import { detectPhrases } from './audio/silenceDetection'
-import { Phrase, DEFAULT_SETTINGS, DetectionSettings as DetectionSettingsType } from './types'
+import { exportPhrases } from './audio/exporter'
+import { Phrase, DEFAULT_SETTINGS, DetectionSettings as DetectionSettingsType, ExportProgress } from './types'
 import { AudioUploader } from './components/AudioUploader'
 import { DetectionSettings } from './components/DetectionSettings'
 import { PhraseList } from './components/PhraseList'
 import { WaveformPanel } from './components/WaveformPanel'
+import { ExportPanel } from './components/ExportPanel'
 
 export default function App() {
   const engineRef = useRef(new AudioEngine())
   const [audioLoaded, setAudioLoaded] = useState(false)
   const [phrases, setPhrases] = useState<Phrase[]>([])
   const [settings, setSettings] = useState<DetectionSettingsType>(DEFAULT_SETTINGS)
+  const [exportProgress, setExportProgress] = useState<ExportProgress>({
+    current: 0, total: 0, status: 'idle'
+  })
 
   const handleDetect = () => {
     const engine = engineRef.current
@@ -57,6 +62,25 @@ export default function App() {
     ))
   }
 
+  const handleExport = async () => {
+    const engine = engineRef.current
+    if (!engine.buffer || phrases.length === 0) return
+
+    const audioData = engine.getChannelData()
+    setExportProgress({ current: 0, total: phrases.length, status: 'encoding' })
+
+    await exportPhrases(
+      audioData,
+      engine.buffer.sampleRate,
+      phrases,
+      engine.fileName,
+      (current, total) => setExportProgress({ current, total, status: 'encoding' })
+    )
+
+    setExportProgress(prev => ({ ...prev, status: 'done' }))
+    setTimeout(() => setExportProgress({ current: 0, total: 0, status: 'idle' }), 2000)
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6 max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Slicerex</h1>
@@ -87,6 +111,9 @@ export default function App() {
               onUnmerge={handleUnmerge}
               onToggleExclude={handleToggleExclude}
             />
+          )}
+          {phrases.length > 0 && (
+            <ExportPanel onExport={handleExport} progress={exportProgress} />
           )}
         </>
       )}
