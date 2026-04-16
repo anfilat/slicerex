@@ -1,4 +1,4 @@
-import { DetectionSettings } from '../types'
+import type { DetectionSettings } from '../types'
 
 interface Props {
   settings: DetectionSettings

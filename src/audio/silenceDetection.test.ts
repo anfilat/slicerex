@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
 import { detectPhrases } from './silenceDetection'
-import { Phrase } from '../types'
 
 // Helper: create a Float32Array representing audio with silence gaps
 function createTestAudio(
