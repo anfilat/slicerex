@@ -1,8 +1,8 @@
-import { Phrase } from '../types'
+import { Phrase } from "../types";
 
 export interface WhisperProgress {
-  status: 'loading' | 'transcribing' | 'done'
-  progress: number  // 0-100
+  status: "loading" | "transcribing" | "done";
+  progress: number; // 0-100
 }
 
 /**
@@ -51,26 +51,26 @@ export interface WhisperProgress {
 export async function transcribeWithWhisper(
   audioData: Float32Array,
   sampleRate: number,
-  model: 'tiny' | 'base' | 'small',
-  onProgress: (p: WhisperProgress) => void
+  model: "tiny" | "base" | "small",
+  onProgress: (p: WhisperProgress) => void,
 ): Promise<{ phrases: Phrase[] }> {
   // Report loading progress
-  onProgress({ status: 'loading', progress: 0 })
+  onProgress({ status: "loading", progress: 0 });
 
   // STUB: Throw error indicating Whisper is not yet implemented
   // Use parameters to avoid unused variable warnings
-  void audioData
-  void sampleRate
-  void model
+  void audioData;
+  void sampleRate;
+  void model;
 
   throw new Error(
-    'Whisper transcription is not yet available. ' +
-    'This is a placeholder implementation. ' +
-    'To enable Whisper transcription, integrate one of the following packages:\n' +
-    '  - @xenova/transformers (recommended)\n' +
-    '  - @remotion/whisper-web\n\n' +
-    'See implementation notes in src/audio/whisperTranscription.ts for research findings.'
-  )
+    "Whisper transcription is not yet available. " +
+      "This is a placeholder implementation. " +
+      "To enable Whisper transcription, integrate one of the following packages:\n" +
+      "  - @xenova/transformers (recommended)\n" +
+      "  - @remotion/whisper-web\n\n" +
+      "See implementation notes in src/audio/whisperTranscription.ts for research findings.",
+  );
 
   /* Implementation example for @xenova/transformers (when ready):
 
@@ -137,16 +137,16 @@ export async function transcribeWithWhisper(
 export function prepareAudioForWhisper(audioData: Float32Array, sampleRate: number): Float32Array {
   // Resample to 16kHz if needed
   if (sampleRate !== 16000) {
-    const ratio = sampleRate / 16000
-    const newLength = Math.round(audioData.length / ratio)
-    const resampled = new Float32Array(newLength)
+    const ratio = sampleRate / 16000;
+    const newLength = Math.round(audioData.length / ratio);
+    const resampled = new Float32Array(newLength);
     for (let i = 0; i < newLength; i++) {
-      const srcIndex = Math.round(i * ratio)
-      resampled[i] = audioData[srcIndex]
+      const srcIndex = Math.round(i * ratio);
+      resampled[i] = audioData[srcIndex];
     }
-    return resampled
+    return resampled;
   }
-  return audioData
+  return audioData;
 }
 
 /**
@@ -173,10 +173,10 @@ export function parseWhisperResult(result: unknown): Phrase[] {
   // }
 
   // Use result parameter to avoid unused variable warning
-  void result
+  void result;
 
-  const phrases: Phrase[] = []
+  const phrases: Phrase[] = [];
   // TODO: Implement parsing based on actual output format
 
-  return phrases
+  return phrases;
 }

@@ -1,12 +1,12 @@
-import { ExportProgress } from '../types'
+import { ExportProgress } from "../types";
 
 interface Props {
-  onExport: () => void
-  progress: ExportProgress
+  onExport: () => void;
+  progress: ExportProgress;
 }
 
 export function ExportPanel({ onExport, progress }: Props) {
-  const isExporting = progress.status === 'encoding'
+  const isExporting = progress.status === "encoding";
 
   return (
     <div className="mb-6 p-4 bg-gray-800 rounded-lg">
@@ -16,7 +16,7 @@ export function ExportPanel({ onExport, progress }: Props) {
           disabled={isExporting}
           className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-white disabled:opacity-50"
         >
-          {isExporting ? 'Exporting...' : 'Export all'}
+          {isExporting ? "Exporting..." : "Export all"}
         </button>
         {isExporting && (
           <>
@@ -33,5 +33,5 @@ export function ExportPanel({ onExport, progress }: Props) {
         )}
       </div>
     </div>
-  )
+  );
 }

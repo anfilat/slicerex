@@ -6,9 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "oxlint src/",
+    "format": "oxfmt src/",
+    "format:check": "oxfmt --check src/",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest run",
+    "pre-commit": "oxlint src/ && oxfmt --check src/ && vitest run"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npm run pre-commit"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
@@ -19,13 +25,14 @@
     "wavesurfer.js": "^7.9.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^6.0.1",
     "autoprefixer": "^10.5.0",
+    "oxfmt": "^0.45.0",
+    "oxlint": "^1.60.0",
+    "simple-git-hooks": "^2.13.1",
     "typescript": "^6.0.2",
-    "typescript-eslint": "^8.24.1",
     "vite": "^8.0.8",
     "vitest": "^4.1.4"
   }
