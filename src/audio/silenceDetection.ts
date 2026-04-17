@@ -63,25 +63,17 @@ export function detectPhrases(audioData: Float32Array, sampleRate: number, confi
   }
 
   const minPhraseSec = config.minPhraseDuration / 1000;
-  let phraseId = 0;
 
-  const phrases: Phrase[] = boundaries
+  return boundaries
     .filter(b => b.end - b.start >= minPhraseSec)
-    .map(b => {
+    .map((b, i) => {
       const paddedStart = Math.max(0, b.start - paddingSec);
       const paddedEnd = Math.min(totalDuration, b.end + paddingSec);
-      const phrase: Phrase = {
-        id: phraseId,
+      return {
+        id: i,
         startTime: Math.round(paddedStart * 1000) / 1000,
         endTime: Math.round(paddedEnd * 1000) / 1000,
         excluded: false,
       };
-      phraseId++;
-      return phrase;
     });
-
-  return phrases.map((p, i) => ({
-    ...p,
-    id: i,
-  }));
 }
