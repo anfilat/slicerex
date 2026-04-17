@@ -8,40 +8,14 @@ export async function exportPhrases(
   filePrefix: string,
   onProgress: (current: number, total: number) => void
 ): Promise<void> {
-  // Build export groups: adjacent non-excluded phrases with same groupId
-  const exportGroups: Phrase[][] = [];
-  let currentGroup: Phrase[] = [];
-
-  for (const phrase of phrases) {
-    if (phrase.excluded) {
-      if (currentGroup.length > 0) {
-        exportGroups.push(currentGroup);
-        currentGroup = [];
-      }
-      continue;
-    }
-    if (currentGroup.length > 0 && currentGroup[0].groupId === phrase.groupId) {
-      currentGroup.push(phrase);
-    } else {
-      if (currentGroup.length > 0) exportGroups.push(currentGroup);
-      currentGroup = [phrase];
-    }
-  }
-  if (currentGroup.length > 0) exportGroups.push(currentGroup);
-
-  const total = exportGroups.length;
+  // Export each non-excluded phrase individually
+  const phrasesToExport = phrases.filter(p => !p.excluded);
+  const total = phrasesToExport.length;
   onProgress(0, total);
 
-  for (let i = 0; i < exportGroups.length; i++) {
-    const group = exportGroups[i];
-    const mergedPhrase: Phrase = {
-      ...group[0],
-      id: group[0].id,
-      startTime: Math.min(...group.map(p => p.startTime)),
-      endTime: Math.max(...group.map(p => p.endTime)),
-    };
-
-    const blob = await encodePhraseToMp3(audioData, sampleRate, mergedPhrase);
+  for (let i = 0; i < phrasesToExport.length; i++) {
+    const phrase = phrasesToExport[i];
+    const blob = await encodePhraseToMp3(audioData, sampleRate, phrase);
 
     const num = String(i + 1).padStart(2, '0');
     const fileName = `${filePrefix}_${num}.mp3`;

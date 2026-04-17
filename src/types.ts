@@ -2,7 +2,6 @@ export interface Phrase {
   id: number;
   startTime: number; // seconds
   endTime: number; // seconds
-  groupId: number; // same groupId = merged into one file
   excluded: boolean; // true = skip on export
   transcript?: string; // from Whisper, optional
 }

@@ -69,7 +69,7 @@ describe('detectPhrases', () => {
     expect(phrases).toHaveLength(2);
   });
 
-  it('assigns unique sequential IDs and groupIds', () => {
+  it('assigns unique sequential IDs', () => {
     const audio = createTestAudio(sampleRate, [
       { durationMs: 300, amplitude: 0.5 },
       { durationMs: 400, amplitude: 0 },
@@ -82,7 +82,6 @@ describe('detectPhrases', () => {
       padding: 0,
     });
     expect(phrases.map(p => p.id)).toEqual([0, 1]);
-    expect(phrases.map(p => p.groupId)).toEqual([0, 1]);
     expect(phrases.every(p => p.excluded === false)).toBe(true);
   });
 

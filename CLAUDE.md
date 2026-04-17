@@ -30,11 +30,11 @@ Browser-based audio phrase splitter. No backend — everything runs client-side.
 
 - `src/audio/` — Pure audio logic (no React). `AudioEngine` wraps Web Audio API (decode, play, WAV conversion). `silenceDetection` is a pure function `detectPhrases(audioData, sampleRate, config) → Phrase[]`. MP3 encoding runs in a Web Worker (`mp3Encoder.worker.ts`) via `lamejs` to avoid blocking the UI. `whisperTranscription` is currently a stub.
 - `src/components/` — React UI. `WaveformPanel` integrates WaveSurfer.js v7 with Regions plugin for interactive waveform with draggable phrase boundaries. Bidirectional sync: dragging a region boundary updates the phrase list, and merging/excluding phrases updates the waveform regions.
-- `src/types.ts` — Core data model. `Phrase` has `id`, `startTime`, `endTime`, `groupId` (same groupId = merged into one export file), `excluded`, and optional `transcript`.
+- `src/types.ts` — Core data model. `Phrase` has `id`, `startTime`, `endTime`, `excluded`, and optional `transcript`.
 
-**Phrase merge/exclude model:** Adjacent phrases with the same `groupId` export as a single MP3. Excluded phrases are skipped during export. The exporter in `src/audio/exporter.ts` groups by `groupId`, encodes each group to MP3 in a worker, and downloads sequentially as `<original_name>_01.mp3`, `<original_name>_02.mp3`, etc.
+**Phrase merge/exclude model:** Users can manually merge adjacent phrases in the UI (combining them into a single phrase with a new ID). Excluded phrases are skipped during export. The exporter in `src/audio/exporter.ts` exports each non-excluded phrase individually as MP3 files, downloading sequentially as `<original_name>_01.mp3`, `<original_name>_02.mp3`, etc.
 
-**Export pipeline:** `exportPhrases()` groups phrases → for each group, `encodePhraseToMp3()` spawns a worker → worker converts Float32→Int16, encodes with lamejs → returns MP3 Blob → triggers download.
+**Export pipeline:** `exportPhrases()` filters non-excluded phrases → for each phrase, `encodePhraseToMp3()` spawns a worker → worker converts Float32→Int16, encodes with lamejs → returns MP3 Blob → triggers download.
 
 ## Key Design Decisions
 

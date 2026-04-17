@@ -110,7 +110,6 @@ export default function App() {
       id: Math.max(...phrases.map(p => p.id)) + 1,
       startTime: current.startTime,
       endTime: next.endTime,
-      groupId: Math.max(...phrases.map(p => p.id)) + 1,
       excluded: current.excluded && next.excluded,
     };
 
@@ -132,14 +131,12 @@ export default function App() {
     const first: Phrase = {
       ...phrase,
       id: maxId + 1,
-      groupId: maxId + 1,
       startTime: phrase.startTime,
       endTime: midPoint,
     };
     const second: Phrase = {
       ...phrase,
       id: maxId + 2,
-      groupId: maxId + 2,
       startTime: midPoint,
       endTime: phrase.endTime,
     };

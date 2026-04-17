@@ -74,7 +74,6 @@ export function detectPhrases(audioData: Float32Array, sampleRate: number, confi
         id: phraseId,
         startTime: Math.round(paddedStart * 1000) / 1000,
         endTime: Math.round(paddedEnd * 1000) / 1000,
-        groupId: phraseId,
         excluded: false,
       };
       phraseId++;
@@ -84,6 +83,5 @@ export function detectPhrases(audioData: Float32Array, sampleRate: number, confi
   return phrases.map((p, i) => ({
     ...p,
     id: i,
-    groupId: i,
   }));
 }
