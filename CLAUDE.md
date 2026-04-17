@@ -28,7 +28,7 @@ Browser-based audio phrase splitter. No backend — everything runs client-side.
 
 **Three layers:**
 
-- `src/audio/` — Pure audio logic (no React). `AudioEngine` wraps Web Audio API (decode, play, WAV conversion). `silenceDetection` is a pure function `detectPhrases(audioData, sampleRate, config) → Phrase[]`. MP3 encoding runs in a Web Worker (`mp3Encoder.worker.ts`) via `lamejs` to avoid blocking the UI. `whisperTranscription` is currently a stub.
+- `src/audio/` — Pure audio logic (no React). `AudioEngine` wraps Web Audio API (decode, play, getChannelData for mono Float32Array). `silenceDetection` is a pure function `detectPhrases(audioData, sampleRate, config) → Phrase[]`. MP3 encoding runs in a Web Worker (`mp3Encoder.worker.ts`) via `lamejs` to avoid blocking the UI. `whisperTranscription` is currently a stub.
 - `src/components/` — React UI. `WaveformPanel` integrates WaveSurfer.js v7 with Regions plugin for interactive waveform with draggable phrase boundaries. Bidirectional sync: dragging a region boundary updates the phrase list, and merging/excluding phrases updates the waveform regions.
 - `src/types.ts` — Core data model. `Phrase` has `id`, `startTime`, `endTime`, `excluded`, and optional `transcript`.
 
@@ -39,7 +39,6 @@ Browser-based audio phrase splitter. No backend — everything runs client-side.
 ## Key Design Decisions
 
 - Whisper transcription is stubbed (`src/audio/whisperTranscription.ts` throws). When Whisper is selected in the UI, it falls back to silence detection. Real implementation would use `@xenova/transformers` or similar.
-- `audioBufferToWav()` on AudioEngine converts AudioBuffer to WAV Blob for WaveSurfer.js, which needs a URL/Blob to render the waveform.
 - Workers are ES module workers (`{ type: 'module' }`), configured in `vite.config.ts` with `worker: { format: 'es' }`.
 - Tailwind CSS v4 uses `@tailwindcss/vite` plugin only — no PostCSS config or tailwind.config.js needed.
 
