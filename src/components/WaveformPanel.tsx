@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.js';
+import ZoomPlugin from 'wavesurfer.js/dist/plugins/zoom.js';
+import TimelinePlugin from 'wavesurfer.js/dist/plugins/timeline.js';
 import { Phrase } from '../types';
 import { AudioEngine } from '../audio/audioEngine';
 
@@ -32,6 +34,9 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
       barGap: 1,
       interact: false,
     });
+
+    ws.registerPlugin(ZoomPlugin.create({ exponentialZooming: true }));
+    ws.registerPlugin(TimelinePlugin.create());
 
     const regionsPlugin = ws.registerPlugin(RegionsPlugin.create());
     wsRef.current = ws;
@@ -96,7 +101,9 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
 
   return (
     <div className="mb-6">
-      <div ref={containerRef} className="bg-white rounded-lg border border-gray-200 overflow-hidden" />
+      <div className="overflow-x-auto rounded-lg border border-gray-200">
+        <div ref={containerRef} className="bg-white" />
+      </div>
     </div>
   );
 }
