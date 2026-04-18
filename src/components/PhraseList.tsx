@@ -5,6 +5,7 @@ interface Props {
   phrases: Phrase[];
   highlightedId: number | null;
   currentPhraseId: number | null;
+  scrollToPhrase: number | null;
   isPlaying: boolean;
   onPlay: (phrase: Phrase) => void;
   onStop: () => void;
@@ -20,6 +21,7 @@ export function PhraseList({
   phrases,
   highlightedId,
   currentPhraseId,
+  scrollToPhrase,
   isPlaying,
   onPlay,
   onStop,
@@ -63,6 +65,7 @@ export function PhraseList({
             index={i}
             isLast={i === phrases.length - 1}
             highlighted={phrase.id === highlightedId}
+            shouldScroll={i === scrollToPhrase}
             isCurrent={phrase.id === currentPhraseId}
             isCurrentPlaying={phrase.id === currentPhraseId && isPlaying}
             onPlay={onPlay}

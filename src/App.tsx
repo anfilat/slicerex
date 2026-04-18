@@ -32,6 +32,7 @@ export default function App() {
   const [scrollToPhrase, setScrollToPhrase] = useState<number | null>(null);
   const [currentPhraseId, setCurrentPhraseId] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const playSessionRef = useRef(0);
   const [whisperProgress, setWhisperProgress] = useState<{
     status: 'idle' | 'loading' | 'transcribing' | 'done' | 'error';
     progress: number;
@@ -119,11 +120,17 @@ export default function App() {
   const handlePlay = async (phrase: Phrase) => {
     setCurrentPhraseId(phrase.id);
     setIsPlaying(true);
+    setScrollToPhrase(phrases.findIndex(p => p.id === phrase.id));
+    const session = ++playSessionRef.current;
     await engineRef.current.playSegment(phrase.startTime, phrase.endTime);
-    setIsPlaying(false);
+    if (playSessionRef.current === session) {
+      setIsPlaying(false);
+    }
   };
 
   const handleStop = () => {
+    playSessionRef.current++;
+    setIsPlaying(false);
     engineRef.current.stop();
   };
 
@@ -255,6 +262,7 @@ export default function App() {
               phrases={phrases}
               highlightedId={highlightedId}
               currentPhraseId={currentPhraseId}
+              scrollToPhrase={scrollToPhrase}
               isPlaying={isPlaying}
               onPlay={handlePlay}
               onStop={handleStop}

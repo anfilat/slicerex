@@ -6,6 +6,7 @@ interface Props {
   index: number;
   isLast: boolean;
   highlighted: boolean;
+  shouldScroll: boolean;
   isCurrent: boolean;
   isCurrentPlaying: boolean;
   onPlay: (phrase: Phrase) => void;
@@ -21,6 +22,7 @@ export function PhraseCard({
   index,
   isLast,
   highlighted,
+  shouldScroll,
   isCurrent,
   isCurrentPlaying,
   onPlay,
@@ -33,9 +35,9 @@ export function PhraseCard({
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!highlighted || !ref.current) return;
+    if ((!highlighted && !shouldScroll) || !ref.current) return;
     ref.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, [highlighted]);
+  }, [highlighted, shouldScroll]);
   const formatTime = (t: number) => {
     const min = Math.floor(t / 60);
     const sec = Math.floor(t % 60);
