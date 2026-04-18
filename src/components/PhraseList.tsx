@@ -5,7 +5,9 @@ interface Props {
   phrases: Phrase[];
   highlightedId: number | null;
   currentPhraseId: number | null;
+  isPlaying: boolean;
   onPlay: (phrase: Phrase) => void;
+  onStop: () => void;
   onPlayNext: () => void;
   onMerge: (id: number) => void;
   onSplit: (id: number) => void;
@@ -17,7 +19,9 @@ export function PhraseList({
   phrases,
   highlightedId,
   currentPhraseId,
+  isPlaying,
   onPlay,
+  onStop,
   onPlayNext,
   onMerge,
   onSplit,
@@ -42,6 +46,11 @@ export function PhraseList({
         >
           Play next ▶
         </button>
+        {isPlaying && (
+          <button onClick={onStop} className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded">
+            Stop ■
+          </button>
+        )}
       </div>
       <div className="flex flex-col gap-2 max-h-96 overflow-y-auto">
         {phrases.map((phrase, i) => (
@@ -52,7 +61,9 @@ export function PhraseList({
             isLast={i === phrases.length - 1}
             highlighted={phrase.id === highlightedId}
             isCurrent={phrase.id === currentPhraseId}
+            isCurrentPlaying={phrase.id === currentPhraseId && isPlaying}
             onPlay={onPlay}
+            onStop={onStop}
             onMerge={onMerge}
             onSplit={onSplit}
             onToggleExclude={onToggleExclude}

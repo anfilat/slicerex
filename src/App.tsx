@@ -31,6 +31,7 @@ export default function App() {
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [scrollToPhrase, setScrollToPhrase] = useState<number | null>(null);
   const [currentPhraseId, setCurrentPhraseId] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [whisperProgress, setWhisperProgress] = useState<{
     status: 'idle' | 'loading' | 'transcribing' | 'done' | 'error';
     progress: number;
@@ -112,7 +113,13 @@ export default function App() {
 
   const handlePlay = async (phrase: Phrase) => {
     setCurrentPhraseId(phrase.id);
+    setIsPlaying(true);
     await engineRef.current.playSegment(phrase.startTime, phrase.endTime);
+    setIsPlaying(false);
+  };
+
+  const handleStop = () => {
+    engineRef.current.stop();
   };
 
   const handlePlayNext = () => {
@@ -233,7 +240,9 @@ export default function App() {
               phrases={phrases}
               highlightedId={highlightedId}
               currentPhraseId={currentPhraseId}
+              isPlaying={isPlaying}
               onPlay={handlePlay}
+              onStop={handleStop}
               onPlayNext={handlePlayNext}
               onMerge={handleMerge}
               onSplit={handleSplit}
