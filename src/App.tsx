@@ -169,6 +169,10 @@ export default function App() {
     const newPhrases = [...phrases];
     newPhrases.splice(idx, 2, merged);
     setPhrases(newPhrases);
+
+    if (currentPhraseId === id || currentPhraseId === next.id) {
+      setCurrentPhraseId(merged.id);
+    }
   };
 
   const handleSplit = (id: number) => {
@@ -197,6 +201,10 @@ export default function App() {
     const newPhrases = [...phrases];
     newPhrases.splice(idx, 1, first, second);
     setPhrases(newPhrases);
+
+    if (currentPhraseId === id) {
+      setCurrentPhraseId(first.id);
+    }
   };
 
   const handleToggleExclude = (id: number) => {
