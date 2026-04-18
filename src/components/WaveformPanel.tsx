@@ -148,7 +148,7 @@ export function WaveformPanel({
   }, [currentPhraseIndex, phrases, isReady]);
 
   return (
-    <div className="mb-6">
+    <div className="mb-4 shrink-0">
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <div ref={containerRef} className="bg-white" />
       </div>

@@ -216,24 +216,29 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Slicerex</h1>
-      <AudioUploader
-        engine={engineRef.current}
-        onLoaded={() => {
-          setAudioLoaded(true);
-          setPhrases([]);
-          setCurrentPhraseId(null);
-        }}
-      />
+    <div className="h-screen flex flex-col bg-gray-50 text-gray-900 p-6 max-w-5xl mx-auto overflow-hidden">
+      <h1 className="text-2xl font-bold mb-4 shrink-0">Slicerex</h1>
+      <div className="mb-4 flex items-center gap-3 shrink-0">
+        <AudioUploader
+          engine={engineRef.current}
+          onLoaded={() => {
+            setAudioLoaded(true);
+            setPhrases([]);
+            setCurrentPhraseId(null);
+          }}
+        />
+        {audioLoaded && (
+          <button
+            onClick={handleDetect}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white disabled:opacity-50"
+          >
+            Detect phrases
+          </button>
+        )}
+      </div>
       {audioLoaded && (
         <>
-          <DetectionSettings
-            settings={settings}
-            onChange={setSettings}
-            onDetect={handleDetect}
-            disabled={!audioLoaded}
-          />
+          <DetectionSettings settings={settings} onChange={setSettings} />
           <WhisperStatus status={whisperProgress.status} progress={whisperProgress.progress} />
           {phrases.length > 0 && (
             <WaveformPanel

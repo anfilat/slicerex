@@ -23,7 +23,7 @@ export function AudioUploader({ engine, onLoaded }: Props) {
   };
 
   return (
-    <div className="mb-6">
+    <div>
       <button
         onClick={() => inputRef.current?.click()}
         disabled={loading}

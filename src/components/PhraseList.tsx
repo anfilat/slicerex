@@ -38,8 +38,8 @@ export function PhraseList({
   const canPlayNext = currentIdx >= 0 && currentIdx < phrases.length - 1;
 
   return (
-    <div className="mb-6">
-      <div className="flex items-center gap-3 mb-3">
+    <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex items-center gap-3 mb-3 shrink-0">
         <h2 className="text-lg font-semibold">Phrases ({phrases.length})</h2>
         <button
           onClick={onPlayCurrent}
@@ -55,7 +55,7 @@ export function PhraseList({
           Play next ▶
         </button>
       </div>
-      <div className="flex flex-col gap-2 max-h-96 overflow-y-auto">
+      <div className="flex flex-col gap-2 overflow-y-auto min-h-0">
         {phrases.map((phrase, i) => (
           <PhraseCard
             key={phrase.id}
