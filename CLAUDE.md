@@ -32,7 +32,7 @@ Browser-based audio phrase splitter. No backend — everything runs client-side.
 - `src/components/` — React UI. `WaveformPanel` integrates WaveSurfer.js v7 with Regions plugin for interactive waveform with draggable phrase boundaries. Bidirectional sync: dragging a region boundary updates the phrase list, and merging/excluding phrases updates the waveform regions.
 - `src/types.ts` — Core data model. `Phrase` has `id`, `startTime`, `endTime`, `excluded`, and optional `transcript`.
 
-**Phrase merge/exclude model:** Users can manually merge adjacent phrases in the UI (combining them into a single phrase with a new ID). Excluded phrases are skipped during export. The exporter in `src/audio/exporter.ts` exports each non-excluded phrase individually as MP3 files, downloading sequentially as `<original_name>_01.mp3`, `<original_name>_02.mp3`, etc.
+**Phrase editing model:** Users can merge adjacent phrases (combining into one with a new ID), split a phrase at its midpoint (creating two new phrases), and toggle exclusion. Excluded phrases are skipped during export. The exporter in `src/audio/exporter.ts` exports each non-excluded phrase individually as MP3 files, downloading sequentially as `<original_name>_01.mp3`, `<original_name>_02.mp3`, etc.
 
 **Export pipeline:** `exportPhrases()` filters non-excluded phrases → for each phrase, `encodePhraseToMp3()` spawns a worker → worker converts Float32→Int16, encodes with lamejs → returns MP3 Blob → triggers download.
 
@@ -41,6 +41,9 @@ Browser-based audio phrase splitter. No backend — everything runs client-side.
 - Whisper transcription is stubbed (`src/audio/whisperTranscription.ts` throws). When Whisper is selected in the UI, it falls back to silence detection. Real implementation would use `@xenova/transformers` or similar.
 - Workers are ES module workers (`{ type: 'module' }`), configured in `vite.config.ts` with `worker: { format: 'es' }`.
 - Tailwind CSS v4 uses `@tailwindcss/vite` plugin only — no PostCSS config or tailwind.config.js needed.
+- PWA via `vite-plugin-pwa` with auto-update registration in `src/main.tsx`. No manifest file — Workbox handles caching with `globPatterns` for static assets.
+- App is deployed under `base: '/slicerex'` in Vite config.
+- Pre-commit hook via `simple-git-hooks`: runs lint, format check, and tests.
 
 ## Tech Stack
 
