@@ -29,6 +29,7 @@ export default function App() {
   });
   const [highlightedId, setHighlightedId] = useState<number | null>(null);
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [scrollToPhrase, setScrollToPhrase] = useState<number | null>(null);
   const [whisperProgress, setWhisperProgress] = useState<{
     status: 'idle' | 'loading' | 'transcribing' | 'done' | 'error';
     progress: number;
@@ -40,6 +41,10 @@ export default function App() {
     if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
     setHighlightedId(phrase.id);
     highlightTimerRef.current = setTimeout(() => setHighlightedId(null), 1500);
+  };
+
+  const handlePhraseSelect = (index: number) => {
+    setScrollToPhrase(index);
   };
 
   const handleDetect = async () => {
@@ -203,6 +208,7 @@ export default function App() {
             <WaveformPanel
               engine={engineRef.current}
               phrases={phrases}
+              scrollToPhrase={scrollToPhrase}
               onPhraseBoundaryChange={handlePhraseBoundaryChange}
               onRegionClick={handleRegionClick}
             />
@@ -215,6 +221,7 @@ export default function App() {
               onMerge={handleMerge}
               onSplit={handleSplit}
               onToggleExclude={handleToggleExclude}
+              onPhraseSelect={handlePhraseSelect}
             />
           )}
           {phrases.length > 0 && <ExportPanel onExport={handleExport} progress={exportProgress} />}

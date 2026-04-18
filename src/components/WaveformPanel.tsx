@@ -9,11 +9,12 @@ import { AudioEngine } from '../audio/audioEngine';
 interface Props {
   engine: AudioEngine;
   phrases: Phrase[];
+  scrollToPhrase: number | null;
   onPhraseBoundaryChange: (id: number, startTime: number, endTime: number) => void;
   onRegionClick?: (phraseIndex: number) => void;
 }
 
-export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange, onRegionClick }: Props) {
+export function WaveformPanel({ engine, phrases, scrollToPhrase, onPhraseBoundaryChange, onRegionClick }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
   const regionsPluginRef = useRef<any>(null);
@@ -114,6 +115,15 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange, onRegio
     rp.on('region-clicked', handler);
     return () => rp.un('region-clicked', handler);
   }, [onRegionClick]);
+
+  // Scroll to phrase region
+  useEffect(() => {
+    if (scrollToPhrase === null) return;
+    const phrase = phrases[scrollToPhrase];
+    const ws = wsRef.current;
+    if (!phrase || !ws) return;
+    ws.setScrollTime(phrase.startTime);
+  }, [scrollToPhrase, phrases]);
 
   return (
     <div className="mb-6">

@@ -10,9 +10,20 @@ interface Props {
   onMerge: (id: number) => void;
   onSplit: (id: number) => void;
   onToggleExclude: (id: number) => void;
+  onSelect: (index: number) => void;
 }
 
-export function PhraseCard({ phrase, index, isLast, highlighted, onPlay, onMerge, onSplit, onToggleExclude }: Props) {
+export function PhraseCard({
+  phrase,
+  index,
+  isLast,
+  highlighted,
+  onPlay,
+  onMerge,
+  onSplit,
+  onToggleExclude,
+  onSelect,
+}: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,7 +40,8 @@ export function PhraseCard({ phrase, index, isLast, highlighted, onPlay, onMerge
   return (
     <div
       ref={ref}
-      className={`flex items-center gap-3 p-3 rounded border transition-colors duration-300 ${highlighted ? 'bg-blue-50 border-blue-200' : phrase.excluded ? 'bg-gray-100/50 opacity-50' : 'bg-white border-gray-200'}`}
+      onClick={() => onSelect(index)}
+      className={`flex items-center gap-3 p-3 rounded border transition-colors duration-300 cursor-pointer ${highlighted ? 'bg-blue-50 border-blue-200' : phrase.excluded ? 'bg-gray-100/50 opacity-50' : 'bg-white border-gray-200'}`}
     >
       <button
         onClick={() => onPlay(phrase)}

@@ -8,9 +8,18 @@ interface Props {
   onMerge: (id: number) => void;
   onSplit: (id: number) => void;
   onToggleExclude: (id: number) => void;
+  onPhraseSelect: (index: number) => void;
 }
 
-export function PhraseList({ phrases, highlightedId, onPlay, onMerge, onSplit, onToggleExclude }: Props) {
+export function PhraseList({
+  phrases,
+  highlightedId,
+  onPlay,
+  onMerge,
+  onSplit,
+  onToggleExclude,
+  onPhraseSelect,
+}: Props) {
   if (phrases.length === 0) {
     return <p className="text-gray-600">No phrases detected yet.</p>;
   }
@@ -30,6 +39,7 @@ export function PhraseList({ phrases, highlightedId, onPlay, onMerge, onSplit, o
             onMerge={onMerge}
             onSplit={onSplit}
             onToggleExclude={onToggleExclude}
+            onSelect={onPhraseSelect}
           />
         ))}
       </div>
