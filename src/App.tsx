@@ -116,7 +116,11 @@ export default function App() {
   };
 
   const handlePlayNext = () => {
-    if (currentPhraseId === null) return;
+    if (phrases.length === 0) return;
+    if (currentPhraseId === null) {
+      handlePlay(phrases[0]);
+      return;
+    }
     const idx = phrases.findIndex(p => p.id === currentPhraseId);
     if (idx === -1 || idx === phrases.length - 1) return;
     handlePlay(phrases[idx + 1]);

@@ -29,7 +29,7 @@ export function PhraseList({
   }
 
   const currentIdx = currentPhraseId !== null ? phrases.findIndex(p => p.id === currentPhraseId) : -1;
-  const canPlayNext = currentIdx !== -1 && currentIdx < phrases.length - 1;
+  const canPlayNext = currentIdx === -1 || currentIdx < phrases.length - 1;
 
   return (
     <div className="mb-6">
