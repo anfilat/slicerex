@@ -8,6 +8,7 @@ interface Props {
   isPlaying: boolean;
   onPlay: (phrase: Phrase) => void;
   onStop: () => void;
+  onPlayCurrent: () => void;
   onPlayNext: () => void;
   onMerge: (id: number) => void;
   onSplit: (id: number) => void;
@@ -22,6 +23,7 @@ export function PhraseList({
   isPlaying,
   onPlay,
   onStop,
+  onPlayCurrent,
   onPlayNext,
   onMerge,
   onSplit,
@@ -33,12 +35,18 @@ export function PhraseList({
   }
 
   const currentIdx = currentPhraseId !== null ? phrases.findIndex(p => p.id === currentPhraseId) : -1;
-  const canPlayNext = currentIdx === -1 || currentIdx < phrases.length - 1;
+  const canPlayNext = currentIdx >= 0 && currentIdx < phrases.length - 1;
 
   return (
     <div className="mb-6">
       <div className="flex items-center gap-3 mb-3">
         <h2 className="text-lg font-semibold">Phrases ({phrases.length})</h2>
+        <button
+          onClick={onPlayCurrent}
+          className={`px-3 py-1 text-sm text-white rounded ${isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+        >
+          {isPlaying ? 'Stop ■' : 'Play ▶'}
+        </button>
         <button
           onClick={onPlayNext}
           disabled={!canPlayNext}
@@ -46,11 +54,6 @@ export function PhraseList({
         >
           Play next ▶
         </button>
-        {isPlaying && (
-          <button onClick={onStop} className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded">
-            Stop ■
-          </button>
-        )}
       </div>
       <div className="flex flex-col gap-2 max-h-96 overflow-y-auto">
         {phrases.map((phrase, i) => (

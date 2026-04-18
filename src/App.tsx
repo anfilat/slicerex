@@ -40,6 +40,7 @@ export default function App() {
   const handleRegionClick = (phraseIndex: number) => {
     const phrase = phrases[phraseIndex];
     if (!phrase) return;
+    setCurrentPhraseId(phrase.id);
     if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
     setHighlightedId(phrase.id);
     highlightTimerRef.current = setTimeout(() => setHighlightedId(null), 1500);
@@ -62,12 +63,14 @@ export default function App() {
         padding: settings.padding,
       });
       setPhrases(result);
+      if (result.length > 0) setCurrentPhraseId(result[0].id);
     } else if (settings.method === 'whisper') {
       try {
         const result = await transcribeWithWhisper(channelData, engine.buffer.sampleRate, settings.whisperModel, p =>
           setWhisperProgress({ status: p.status, progress: p.progress })
         );
         setPhrases(result.phrases);
+        if (result.phrases.length > 0) setCurrentPhraseId(result.phrases[0].id);
       } catch {
         setWhisperProgress({ status: 'error', progress: 0 });
         // Fall back to silence detection on error
@@ -78,6 +81,7 @@ export default function App() {
           padding: settings.padding,
         });
         setPhrases(result);
+        if (result.length > 0) setCurrentPhraseId(result[0].id);
       }
     } else {
       // 'both'
@@ -89,6 +93,7 @@ export default function App() {
         padding: settings.padding,
       });
       setPhrases(silenceResult);
+      if (silenceResult.length > 0) setCurrentPhraseId(silenceResult[0].id);
 
       // Then try Whisper in background for transcripts
       try {
@@ -122,13 +127,18 @@ export default function App() {
     engineRef.current.stop();
   };
 
-  const handlePlayNext = () => {
-    if (phrases.length === 0) return;
-    if (currentPhraseId === null) {
-      handlePlay(phrases[0]);
+  const handlePlayCurrent = () => {
+    if (isPlaying) {
+      handleStop();
       return;
     }
-    const idx = phrases.findIndex(p => p.id === currentPhraseId);
+    const phrase = phrases.find(p => p.id === currentPhraseId);
+    if (phrase) handlePlay(phrase);
+  };
+
+  const handlePlayNext = () => {
+    if (phrases.length === 0) return;
+    const idx = currentPhraseId !== null ? phrases.findIndex(p => p.id === currentPhraseId) : -1;
     if (idx === -1 || idx === phrases.length - 1) return;
     handlePlay(phrases[idx + 1]);
   };
@@ -243,6 +253,7 @@ export default function App() {
               isPlaying={isPlaying}
               onPlay={handlePlay}
               onStop={handleStop}
+              onPlayCurrent={handlePlayCurrent}
               onPlayNext={handlePlayNext}
               onMerge={handleMerge}
               onSplit={handleSplit}
