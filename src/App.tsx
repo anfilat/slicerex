@@ -30,6 +30,7 @@ export default function App() {
   const [highlightedId, setHighlightedId] = useState<number | null>(null);
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [scrollToPhrase, setScrollToPhrase] = useState<number | null>(null);
+  const [currentPhraseId, setCurrentPhraseId] = useState<number | null>(null);
   const [whisperProgress, setWhisperProgress] = useState<{
     status: 'idle' | 'loading' | 'transcribing' | 'done' | 'error';
     progress: number;
@@ -110,7 +111,15 @@ export default function App() {
   };
 
   const handlePlay = async (phrase: Phrase) => {
+    setCurrentPhraseId(phrase.id);
     await engineRef.current.playSegment(phrase.startTime, phrase.endTime);
+  };
+
+  const handlePlayNext = () => {
+    if (currentPhraseId === null) return;
+    const idx = phrases.findIndex(p => p.id === currentPhraseId);
+    if (idx === -1 || idx === phrases.length - 1) return;
+    handlePlay(phrases[idx + 1]);
   };
 
   const handleMerge = (id: number) => {
@@ -193,6 +202,7 @@ export default function App() {
         onLoaded={() => {
           setAudioLoaded(true);
           setPhrases([]);
+          setCurrentPhraseId(null);
         }}
       />
       {audioLoaded && (
@@ -209,6 +219,7 @@ export default function App() {
               engine={engineRef.current}
               phrases={phrases}
               scrollToPhrase={scrollToPhrase}
+              currentPhraseIndex={currentPhraseId !== null ? phrases.findIndex(p => p.id === currentPhraseId) : -1}
               onPhraseBoundaryChange={handlePhraseBoundaryChange}
               onRegionClick={handleRegionClick}
             />
@@ -217,7 +228,9 @@ export default function App() {
             <PhraseList
               phrases={phrases}
               highlightedId={highlightedId}
+              currentPhraseId={currentPhraseId}
               onPlay={handlePlay}
+              onPlayNext={handlePlayNext}
               onMerge={handleMerge}
               onSplit={handleSplit}
               onToggleExclude={handleToggleExclude}

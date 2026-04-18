@@ -18,7 +18,7 @@ export interface DetectionSettings {
 export const DEFAULT_SETTINGS: DetectionSettings = {
   method: 'silence',
   silenceThresholdDb: -40,
-  minSilenceDuration: 300,
+  minSilenceDuration: 1000,
   minPhraseDuration: 200,
   padding: 50,
   whisperModel: 'base',

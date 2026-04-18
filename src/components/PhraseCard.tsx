@@ -6,6 +6,7 @@ interface Props {
   index: number;
   isLast: boolean;
   highlighted: boolean;
+  isCurrent: boolean;
   onPlay: (phrase: Phrase) => void;
   onMerge: (id: number) => void;
   onSplit: (id: number) => void;
@@ -18,6 +19,7 @@ export function PhraseCard({
   index,
   isLast,
   highlighted,
+  isCurrent,
   onPlay,
   onMerge,
   onSplit,
@@ -41,7 +43,7 @@ export function PhraseCard({
     <div
       ref={ref}
       onClick={() => onSelect(index)}
-      className={`flex items-center gap-3 p-3 rounded border transition-colors duration-300 cursor-pointer ${highlighted ? 'bg-blue-50 border-blue-200' : phrase.excluded ? 'bg-gray-100/50 opacity-50' : 'bg-white border-gray-200'}`}
+      className={`flex items-center gap-3 p-3 rounded border transition-colors duration-300 cursor-pointer ${isCurrent ? 'border-l-4 border-l-blue-500 bg-blue-50 border-blue-200' : highlighted ? 'bg-blue-50 border-blue-200' : phrase.excluded ? 'bg-gray-100/50 opacity-50' : 'bg-white border-gray-200'}`}
     >
       <button
         onClick={() => onPlay(phrase)}

@@ -10,11 +10,19 @@ interface Props {
   engine: AudioEngine;
   phrases: Phrase[];
   scrollToPhrase: number | null;
+  currentPhraseIndex: number;
   onPhraseBoundaryChange: (id: number, startTime: number, endTime: number) => void;
   onRegionClick?: (phraseIndex: number) => void;
 }
 
-export function WaveformPanel({ engine, phrases, scrollToPhrase, onPhraseBoundaryChange, onRegionClick }: Props) {
+export function WaveformPanel({
+  engine,
+  phrases,
+  scrollToPhrase,
+  currentPhraseIndex,
+  onPhraseBoundaryChange,
+  onRegionClick,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
   const regionsPluginRef = useRef<any>(null);
@@ -124,6 +132,20 @@ export function WaveformPanel({ engine, phrases, scrollToPhrase, onPhraseBoundar
     if (!phrase || !ws) return;
     ws.setScrollTime(phrase.startTime);
   }, [scrollToPhrase, phrases]);
+
+  // Highlight current phrase region
+  useEffect(() => {
+    const rp = regionsPluginRef.current;
+    if (!rp || !isReady) return;
+    const allRegions: any[] = rp.getRegions();
+    const colors = ['#3b82f633', '#10b98133', '#f59e0b33', '#ef444433', '#8b5cf633'];
+    allRegions.forEach((region: any, i: number) => {
+      const phrase = phrases[i];
+      const isCurrent = i === currentPhraseIndex;
+      const baseColor = phrase?.excluded ? 'rgba(107, 114, 128, 0.2)' : colors[i % colors.length];
+      region.setOptions({ color: isCurrent ? '#3b82f680' : baseColor });
+    });
+  }, [currentPhraseIndex, phrases, isReady]);
 
   return (
     <div className="mb-6">
