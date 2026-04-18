@@ -3,13 +3,14 @@ import { PhraseCard } from './PhraseCard';
 
 interface Props {
   phrases: Phrase[];
+  highlightedId: number | null;
   onPlay: (phrase: Phrase) => void;
   onMerge: (id: number) => void;
   onSplit: (id: number) => void;
   onToggleExclude: (id: number) => void;
 }
 
-export function PhraseList({ phrases, onPlay, onMerge, onSplit, onToggleExclude }: Props) {
+export function PhraseList({ phrases, highlightedId, onPlay, onMerge, onSplit, onToggleExclude }: Props) {
   if (phrases.length === 0) {
     return <p className="text-gray-600">No phrases detected yet.</p>;
   }
@@ -24,6 +25,7 @@ export function PhraseList({ phrases, onPlay, onMerge, onSplit, onToggleExclude 
             phrase={phrase}
             index={i}
             isLast={i === phrases.length - 1}
+            highlighted={phrase.id === highlightedId}
             onPlay={onPlay}
             onMerge={onMerge}
             onSplit={onSplit}

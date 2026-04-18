@@ -10,9 +10,10 @@ interface Props {
   engine: AudioEngine;
   phrases: Phrase[];
   onPhraseBoundaryChange: (id: number, startTime: number, endTime: number) => void;
+  onRegionClick?: (phraseIndex: number) => void;
 }
 
-export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props) {
+export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange, onRegionClick }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
   const regionsPluginRef = useRef<any>(null);
@@ -98,6 +99,21 @@ export function WaveformPanel({ engine, phrases, onPhraseBoundaryChange }: Props
     rp.on('region-updated', handler);
     return () => rp.un('region-updated', handler);
   }, [phrases, onPhraseBoundaryChange]);
+
+  // Handle region click
+  useEffect(() => {
+    const rp = regionsPluginRef.current;
+    if (!rp || !onRegionClick) return;
+
+    const handler = (region: any) => {
+      const allRegions = rp.getRegions();
+      const index = allRegions.indexOf(region);
+      if (index !== -1) onRegionClick(index);
+    };
+
+    rp.on('region-clicked', handler);
+    return () => rp.un('region-clicked', handler);
+  }, [onRegionClick]);
 
   return (
     <div className="mb-6">

@@ -1,16 +1,24 @@
+import { useEffect, useRef } from 'react';
 import { Phrase } from '../types';
 
 interface Props {
   phrase: Phrase;
   index: number;
   isLast: boolean;
+  highlighted: boolean;
   onPlay: (phrase: Phrase) => void;
   onMerge: (id: number) => void;
   onSplit: (id: number) => void;
   onToggleExclude: (id: number) => void;
 }
 
-export function PhraseCard({ phrase, index, isLast, onPlay, onMerge, onSplit, onToggleExclude }: Props) {
+export function PhraseCard({ phrase, index, isLast, highlighted, onPlay, onMerge, onSplit, onToggleExclude }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!highlighted || !ref.current) return;
+    ref.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [highlighted]);
   const formatTime = (t: number) => {
     const min = Math.floor(t / 60);
     const sec = Math.floor(t % 60);
@@ -20,7 +28,8 @@ export function PhraseCard({ phrase, index, isLast, onPlay, onMerge, onSplit, on
 
   return (
     <div
-      className={`flex items-center gap-3 p-3 rounded ${phrase.excluded ? 'bg-gray-100/50 opacity-50' : 'bg-white border border-gray-200'}`}
+      ref={ref}
+      className={`flex items-center gap-3 p-3 rounded border transition-colors duration-300 ${highlighted ? 'bg-blue-50 border-blue-200' : phrase.excluded ? 'bg-gray-100/50 opacity-50' : 'bg-white border-gray-200'}`}
     >
       <button
         onClick={() => onPlay(phrase)}

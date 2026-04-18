@@ -27,10 +27,20 @@ export default function App() {
     total: 0,
     status: 'idle',
   });
+  const [highlightedId, setHighlightedId] = useState<number | null>(null);
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [whisperProgress, setWhisperProgress] = useState<{
     status: 'idle' | 'loading' | 'transcribing' | 'done' | 'error';
     progress: number;
   }>({ status: 'idle', progress: 0 });
+
+  const handleRegionClick = (phraseIndex: number) => {
+    const phrase = phrases[phraseIndex];
+    if (!phrase) return;
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    setHighlightedId(phrase.id);
+    highlightTimerRef.current = setTimeout(() => setHighlightedId(null), 1500);
+  };
 
   const handleDetect = async () => {
     const engine = engineRef.current;
@@ -194,11 +204,13 @@ export default function App() {
               engine={engineRef.current}
               phrases={phrases}
               onPhraseBoundaryChange={handlePhraseBoundaryChange}
+              onRegionClick={handleRegionClick}
             />
           )}
           {phrases.length > 0 && (
             <PhraseList
               phrases={phrases}
+              highlightedId={highlightedId}
               onPlay={handlePlay}
               onMerge={handleMerge}
               onSplit={handleSplit}
