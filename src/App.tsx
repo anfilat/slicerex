@@ -232,7 +232,6 @@ export default function App() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 text-gray-900 p-6 max-w-5xl mx-auto overflow-hidden">
-      <h1 className="text-2xl font-bold mb-4 shrink-0">Slicerex</h1>
       <div className="mb-4 flex items-center gap-3 shrink-0">
         <AudioUploader
           engine={engineRef.current}

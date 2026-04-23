@@ -9,7 +9,7 @@ export function ExportPanel({ onExport, progress }: Props) {
   const isExporting = progress.status === 'encoding';
 
   return (
-    <div className="mb-6 p-4 bg-white rounded-lg border border-gray-200">
+    <div className="p-4 bg-white rounded-lg border border-gray-200">
       <div className="flex items-center gap-4">
         <button
           onClick={onExport}
