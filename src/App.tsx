@@ -4,6 +4,7 @@ import { detectPhrases } from './audio/silenceDetection';
 import { transcribeWithWhisper } from './audio/whisperTranscription';
 import { exportPhrases } from './audio/exporter';
 import { Phrase, DEFAULT_SETTINGS, DetectionSettings as DetectionSettingsType, ExportProgress } from './types';
+import { usePersistedState } from './hooks/usePersistedState';
 import { AudioUploader } from './components/AudioUploader';
 import { DetectionSettings } from './components/DetectionSettings';
 import { PhraseList } from './components/PhraseList';
@@ -21,7 +22,7 @@ export default function App() {
     };
   }, []);
   const [phrases, setPhrases] = useState<Phrase[]>([]);
-  const [settings, setSettings] = useState<DetectionSettingsType>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = usePersistedState<DetectionSettingsType>('detectionSettings', DEFAULT_SETTINGS);
   const [exportProgress, setExportProgress] = useState<ExportProgress>({
     current: 0,
     total: 0,
