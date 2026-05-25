@@ -15,6 +15,7 @@ interface Props {
   onSplit: (id: number) => void;
   onToggleExclude: (id: number) => void;
   onPhraseSelect: (index: number) => void;
+  onScrolled?: () => void;
 }
 
 export function PhraseList({
@@ -31,6 +32,7 @@ export function PhraseList({
   onSplit,
   onToggleExclude,
   onPhraseSelect,
+  onScrolled,
 }: Props) {
   if (phrases.length === 0) {
     return <p className="text-gray-600">No phrases detected yet.</p>;
@@ -74,6 +76,7 @@ export function PhraseList({
             onSplit={onSplit}
             onToggleExclude={onToggleExclude}
             onSelect={onPhraseSelect}
+            onScrolled={onScrolled}
           />
         ))}
       </div>

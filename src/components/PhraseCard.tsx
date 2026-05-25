@@ -15,6 +15,7 @@ interface Props {
   onSplit: (id: number) => void;
   onToggleExclude: (id: number) => void;
   onSelect: (index: number) => void;
+  onScrolled?: () => void;
 }
 
 export function PhraseCard({
@@ -31,12 +32,14 @@ export function PhraseCard({
   onSplit,
   onToggleExclude,
   onSelect,
+  onScrolled,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if ((!highlighted && !shouldScroll) || !ref.current) return;
     ref.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (shouldScroll) onScrolled?.();
   }, [highlighted, shouldScroll]);
   const formatTime = (t: number) => {
     const min = Math.floor(t / 60);

@@ -190,6 +190,7 @@ export default function App() {
               onSplit={handleSplit}
               onToggleExclude={handleToggleExclude}
               onPhraseSelect={handlePhraseSelect}
+              onScrolled={() => setScrollToPhrase(null)}
             />
           )}
           {phrases.length > 0 && <ExportPanel onExport={handleExport} progress={exportProgress} />}
