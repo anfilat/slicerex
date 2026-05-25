@@ -18,6 +18,13 @@ interface Props {
   onScrolled?: () => void;
 }
 
+function formatTime(t: number) {
+  const min = Math.floor(t / 60);
+  const sec = Math.floor(t % 60);
+  const ms = Math.floor((t % 1) * 10);
+  return `${min}:${String(sec).padStart(2, '0')}.${ms}`;
+}
+
 export function PhraseCard({
   phrase,
   index,
@@ -41,12 +48,6 @@ export function PhraseCard({
     ref.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     if (shouldScroll) onScrolled?.();
   }, [highlighted, shouldScroll]);
-  const formatTime = (t: number) => {
-    const min = Math.floor(t / 60);
-    const sec = Math.floor(t % 60);
-    const ms = Math.floor((t % 1) * 10);
-    return `${min}:${String(sec).padStart(2, '0')}.${ms}`;
-  };
 
   return (
     <div
