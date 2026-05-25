@@ -38,6 +38,7 @@ function encodePhraseToMp3(audioData: Float32Array, sampleRate: number, phrase: 
 
     const startSample = Math.floor(phrase.startTime * sampleRate);
     const endSample = Math.floor(phrase.endTime * sampleRate);
+    const segment = audioData.slice(startSample, endSample);
 
     worker.onmessage = e => {
       if (e.data.error) {
@@ -52,11 +53,6 @@ function encodePhraseToMp3(audioData: Float32Array, sampleRate: number, phrase: 
       worker.terminate();
     };
 
-    worker.postMessage({
-      audioData,
-      sampleRate,
-      startSample,
-      endSample,
-    });
+    worker.postMessage({ audioData: segment, sampleRate }, [segment.buffer]);
   });
 }

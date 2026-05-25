@@ -1,19 +1,12 @@
 import { Mp3Encoder } from '@breezystack/lamejs';
 
-export async function encodeToMp3(
-  audioData: Float32Array,
-  sampleRate: number,
-  startSample: number,
-  endSample: number
-): Promise<Blob> {
+export async function encodeToMp3(audioData: Float32Array, sampleRate: number): Promise<Blob> {
   const encoder = new Mp3Encoder(1, sampleRate, 128);
 
-  const segment = audioData.slice(startSample, endSample);
-
   // Convert Float32 to Int16
-  const int16 = new Int16Array(segment.length);
-  for (let i = 0; i < segment.length; i++) {
-    const s = Math.max(-1, Math.min(1, segment[i]));
+  const int16 = new Int16Array(audioData.length);
+  for (let i = 0; i < audioData.length; i++) {
+    const s = Math.max(-1, Math.min(1, audioData[i]));
     int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
   }
 
