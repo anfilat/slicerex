@@ -18,9 +18,11 @@ export class AudioEngine {
     return this.audioBuffer?.duration ?? 0;
   }
 
-  async loadFile(file: File): Promise<AudioBuffer> {
+  async loadFile(file: File): Promise<void> {
     this.stop();
     this._fileName = file.name.replace(/\.[^.]+$/, '');
+    this.audioBuffer = null;
+    this.monoCache = null;
 
     if (!this.audioContext) {
       this.audioContext = new AudioContext();
@@ -28,8 +30,6 @@ export class AudioEngine {
 
     const arrayBuffer = await file.arrayBuffer();
     this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-    this.monoCache = null;
-    return this.audioBuffer;
   }
 
   getChannelData(): Float32Array {
