@@ -1,13 +1,6 @@
-import { Phrase } from '../types';
+import { Phrase, type DetectionSettings } from '../types';
 
-interface DetectionConfig {
-  silenceThresholdDb: number;
-  minSilenceDuration: number; // ms
-  minPhraseDuration: number; // ms
-  padding: number; // ms
-}
-
-export function detectPhrases(audioData: Float32Array, sampleRate: number, config: DetectionConfig): Phrase[] {
+export function detectPhrases(audioData: Float32Array, sampleRate: number, config: DetectionSettings): Phrase[] {
   const windowSize = Math.floor((50 / 1000) * sampleRate);
   const hopSize = Math.floor((10 / 1000) * sampleRate);
 
