@@ -166,7 +166,7 @@ describe('AudioEngine', () => {
       const engine = new AudioEngine();
       mockCtx.decodeAudioData.mockRejectedValue(new Error('bad format'));
 
-      await expect(engine.loadFile(createMockFile('bad.mp3'))).rejects.toThrow('bad format');
+      await expect(engine.loadFile(createMockFile('bad.mp3'))).rejects.toThrow('Unable to decode audio file');
     });
   });
 

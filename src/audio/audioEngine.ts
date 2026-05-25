@@ -29,7 +29,13 @@ export class AudioEngine {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+    try {
+      this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+    } catch {
+      throw new Error(
+        'Unable to decode audio file. Please ensure it is a valid audio format (MP3, WAV, OGG, FLAC, etc.).'
+      );
+    }
   }
 
   getChannelData(): Float32Array {
