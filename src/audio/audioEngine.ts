@@ -3,6 +3,7 @@ export class AudioEngine {
   private audioBuffer: AudioBuffer | null = null;
   private sourceNode: AudioBufferSourceNode | null = null;
   private _fileName: string = '';
+  private playbackId = 0;
 
   get fileName(): string {
     return this._fileName;
@@ -44,21 +45,37 @@ export class AudioEngine {
   }
 
   playSegment(start: number, end: number): Promise<void> {
+    const id = ++this.playbackId;
+
     return new Promise(resolve => {
       this.stop();
       if (!this.audioContext || !this.audioBuffer) return resolve();
 
-      this.sourceNode = this.audioContext.createBufferSource();
-      this.sourceNode.buffer = this.audioBuffer;
-      this.sourceNode.connect(this.audioContext.destination);
+      const sourceNode = this.audioContext.createBufferSource();
+      sourceNode.buffer = this.audioBuffer;
+      sourceNode.connect(this.audioContext.destination);
+      this.sourceNode = sourceNode;
 
       const duration = end - start;
-      this.sourceNode.onended = () => resolve();
-      this.sourceNode.start(0, start, duration);
+
+      // Safety timeout: onended may not fire on some mobile browsers or when tab is backgrounded
+      const timeout = setTimeout(
+        () => {
+          if (this.playbackId === id) resolve();
+        },
+        duration * 1000 + 500
+      );
+
+      sourceNode.onended = () => {
+        clearTimeout(timeout);
+        if (this.playbackId === id) resolve();
+      };
+      sourceNode.start(0, start, duration);
     });
   }
 
   stop(): void {
+    this.playbackId++;
     try {
       this.sourceNode?.stop();
     } catch {
