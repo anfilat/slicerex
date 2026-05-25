@@ -4,6 +4,7 @@ export class AudioEngine {
   private sourceNode: AudioBufferSourceNode | null = null;
   private _fileName: string = '';
   private playbackId = 0;
+  private monoCache: Float32Array | null = null;
 
   get fileName(): string {
     return this._fileName;
@@ -27,6 +28,7 @@ export class AudioEngine {
 
     const arrayBuffer = await file.arrayBuffer();
     this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+    this.monoCache = null;
     return this.audioBuffer;
   }
 
@@ -35,12 +37,14 @@ export class AudioEngine {
     if (this.audioBuffer.numberOfChannels === 1) {
       return this.audioBuffer.getChannelData(0);
     }
+    if (this.monoCache) return this.monoCache;
     const ch0 = this.audioBuffer.getChannelData(0);
     const ch1 = this.audioBuffer.getChannelData(1);
     const mono = new Float32Array(ch0.length);
     for (let i = 0; i < ch0.length; i++) {
       mono[i] = (ch0[i] + ch1[i]) / 2;
     }
+    this.monoCache = mono;
     return mono;
   }
 
