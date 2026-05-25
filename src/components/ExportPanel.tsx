@@ -7,6 +7,7 @@ interface Props {
 
 export function ExportPanel({ onExport, progress }: Props) {
   const isExporting = progress.status === 'encoding';
+  const isError = progress.status === 'error';
 
   return (
     <div className="p-4 bg-white rounded-lg border border-gray-200">
@@ -14,9 +15,9 @@ export function ExportPanel({ onExport, progress }: Props) {
         <button
           onClick={onExport}
           disabled={isExporting}
-          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-white disabled:opacity-50"
+          className={`px-4 py-2 rounded text-white disabled:opacity-50 ${isError ? 'bg-red-600 hover:bg-red-700' : 'bg-purple-600 hover:bg-purple-700'}`}
         >
-          {isExporting ? 'Exporting...' : 'Export all'}
+          {isExporting ? 'Exporting...' : isError ? 'Export failed — retry' : 'Export all'}
         </button>
         {isExporting && (
           <>

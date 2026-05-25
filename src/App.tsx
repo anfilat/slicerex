@@ -223,12 +223,16 @@ export default function App() {
     const audioData = engine.getChannelData();
     setExportProgress({ current: 0, total: phrases.length, status: 'encoding' });
 
-    await exportPhrases(audioData, engine.buffer.sampleRate, phrases, engine.fileName, (current, total) =>
-      setExportProgress({ current, total, status: 'encoding' })
-    );
+    try {
+      await exportPhrases(audioData, engine.buffer.sampleRate, phrases, engine.fileName, (current, total) =>
+        setExportProgress({ current, total, status: 'encoding' })
+      );
 
-    setExportProgress(prev => ({ ...prev, status: 'done' }));
-    setTimeout(() => setExportProgress({ current: 0, total: 0, status: 'idle' }), 2000);
+      setExportProgress(prev => ({ ...prev, status: 'done' }));
+      setTimeout(() => setExportProgress({ current: 0, total: 0, status: 'idle' }), 2000);
+    } catch {
+      setExportProgress({ current: 0, total: 0, status: 'error' });
+    }
   };
 
   return (

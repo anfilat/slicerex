@@ -27,5 +27,5 @@ export const DEFAULT_SETTINGS: DetectionSettings = {
 export interface ExportProgress {
   current: number;
   total: number;
-  status: 'idle' | 'encoding' | 'downloading' | 'done';
+  status: 'idle' | 'encoding' | 'downloading' | 'done' | 'error';
 }
