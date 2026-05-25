@@ -19,8 +19,8 @@ export const DEFAULT_SETTINGS: DetectionSettings = {
   padding: 50,
 };
 
-export interface ExportProgress {
-  current: number;
-  total: number;
-  status: 'idle' | 'encoding' | 'done' | 'error';
-}
+export type ExportProgress =
+  | { status: 'idle' }
+  | { status: 'encoding'; current: number; total: number }
+  | { status: 'done'; total: number }
+  | { status: 'error' };

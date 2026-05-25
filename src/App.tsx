@@ -22,11 +22,7 @@ export default function App() {
   }, []);
   const [phrases, setPhrases] = useState<Phrase[]>([]);
   const [settings, setSettings] = usePersistedState<DetectionSettingsType>('detectionSettings', DEFAULT_SETTINGS);
-  const [exportProgress, setExportProgress] = useState<ExportProgress>({
-    current: 0,
-    total: 0,
-    status: 'idle',
-  });
+  const [exportProgress, setExportProgress] = useState<ExportProgress>({ status: 'idle' });
   const [highlightedId, setHighlightedId] = useState<number | null>(null);
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [scrollToPhrase, setScrollToPhrase] = useState<number | null>(null);
@@ -125,17 +121,17 @@ export default function App() {
     if (!engine.buffer || phrases.length === 0) return;
 
     const audioData = engine.getChannelData();
-    setExportProgress({ current: 0, total: phrases.length, status: 'encoding' });
+    setExportProgress({ status: 'encoding', current: 0, total: phrases.length });
 
     try {
       await exportPhrases(audioData, engine.buffer.sampleRate, phrases, engine.fileName, (current, total) =>
-        setExportProgress({ current, total, status: 'encoding' })
+        setExportProgress({ status: 'encoding', current, total })
       );
 
-      setExportProgress(prev => ({ ...prev, status: 'done' }));
-      setTimeout(() => setExportProgress({ current: 0, total: 0, status: 'idle' }), 2000);
+      setExportProgress(prev => ({ status: 'done', total: prev.status === 'encoding' ? prev.total : 0 }));
+      setTimeout(() => setExportProgress({ status: 'idle' }), 2000);
     } catch {
-      setExportProgress({ current: 0, total: 0, status: 'error' });
+      setExportProgress({ status: 'error' });
     }
   };
 
