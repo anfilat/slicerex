@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.js';
+import type { Region } from 'wavesurfer.js/dist/plugins/regions.js';
 import ZoomPlugin from 'wavesurfer.js/dist/plugins/zoom.js';
 import TimelinePlugin from 'wavesurfer.js/dist/plugins/timeline.js';
 import { Phrase } from '../types';
 import { AudioEngine } from '../audio/audioEngine';
+
+const REGION_COLORS = ['#3b82f633', '#10b98133', '#f59e0b33', '#ef444433', '#8b5cf633'] as const;
+const EXCLUDED_COLOR = 'rgba(107, 114, 128, 0.2)';
 
 interface Props {
   engine: AudioEngine;
@@ -25,7 +29,10 @@ export function WaveformPanel({
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
-  const regionsPluginRef = useRef<any>(null);
+  const regionsPluginRef = useRef<RegionsPlugin | null>(null);
+  const regionByPhraseIdRef = useRef<Map<number, Region>>(new Map());
+  const phrasesRef = useRef(phrases);
+  phrasesRef.current = phrases;
   const [isReady, setIsReady] = useState(false);
   const [loadError, setLoadError] = useState(false);
 
@@ -71,53 +78,82 @@ export function WaveformPanel({
     };
   }, [engine.buffer]);
 
-  // Sync regions with phrases
+  // Sync regions with phrases using diff to avoid destroying regions mid-drag
   useEffect(() => {
     const rp = regionsPluginRef.current;
     if (!rp || !isReady) return;
 
-    const existingRegions = rp.getRegions();
-    existingRegions.forEach((r: any) => r.remove());
+    const regionMap = regionByPhraseIdRef.current;
+    const phraseIds = new Set(phrases.map(p => p.id));
 
-    const colors = ['#3b82f633', '#10b98133', '#f59e0b33', '#ef444433', '#8b5cf633'];
+    // Remove regions whose phrase no longer exists (merged/split)
+    for (const [phraseId, region] of regionMap) {
+      if (!phraseIds.has(phraseId)) {
+        region.remove();
+        regionMap.delete(phraseId);
+      }
+    }
+
+    // Update existing regions or create new ones
     phrases.forEach((phrase, i) => {
-      rp.addRegion({
-        start: phrase.startTime,
-        end: phrase.endTime,
-        color: phrase.excluded ? 'rgba(107, 114, 128, 0.2)' : colors[i % colors.length],
-        drag: false,
-        resize: true,
-        content: `#${i + 1}`,
-      });
+      const color = phrase.excluded ? EXCLUDED_COLOR : REGION_COLORS[i % REGION_COLORS.length];
+      const existing = regionMap.get(phrase.id);
+
+      if (existing) {
+        existing.setOptions({
+          start: phrase.startTime,
+          end: phrase.endTime,
+          color,
+          content: `#${i + 1}`,
+        });
+      } else {
+        const region = rp.addRegion({
+          id: `phrase-${phrase.id}`,
+          start: phrase.startTime,
+          end: phrase.endTime,
+          color,
+          drag: false,
+          resize: true,
+          content: `#${i + 1}`,
+        });
+        regionMap.set(phrase.id, region);
+      }
     });
   }, [phrases, isReady]);
 
-  // Handle region resize
+  // Handle region resize — uses ref to avoid stale closures and resubscription
   useEffect(() => {
     const rp = regionsPluginRef.current;
     if (!rp) return;
 
-    const handler = (region: any) => {
-      const allRegions = rp.getRegions();
-      const index = allRegions.indexOf(region);
-      if (index === -1) return;
-      const phrase = phrases[index];
+    const handler = (region: Region) => {
+      const regionId = region.id;
+      if (!regionId.startsWith('phrase-')) return;
+      const phraseId = Number(regionId.replace('phrase-', ''));
+      if (Number.isNaN(phraseId)) return;
+
+      const phrase = phrasesRef.current.find(p => p.id === phraseId);
       if (!phrase) return;
+
       onPhraseBoundaryChange(phrase.id, region.start, region.end);
     };
 
     rp.on('region-updated', handler);
     return () => rp.un('region-updated', handler);
-  }, [phrases, onPhraseBoundaryChange]);
+  }, [onPhraseBoundaryChange]);
 
-  // Handle region click
+  // Handle region click — resolves phrase index by region ID
   useEffect(() => {
     const rp = regionsPluginRef.current;
     if (!rp || !onRegionClick) return;
 
-    const handler = (region: any) => {
-      const allRegions = rp.getRegions();
-      const index = allRegions.indexOf(region);
+    const handler = (region: Region) => {
+      const regionId = region.id;
+      if (!regionId.startsWith('phrase-')) return;
+      const phraseId = Number(regionId.replace('phrase-', ''));
+      if (Number.isNaN(phraseId)) return;
+
+      const index = phrasesRef.current.findIndex(p => p.id === phraseId);
       if (index !== -1) onRegionClick(index);
     };
 
@@ -136,14 +172,14 @@ export function WaveformPanel({
 
   // Highlight current phrase region
   useEffect(() => {
-    const rp = regionsPluginRef.current;
-    if (!rp || !isReady) return;
-    const allRegions: any[] = rp.getRegions();
-    const colors = ['#3b82f633', '#10b98133', '#f59e0b33', '#ef444433', '#8b5cf633'];
-    allRegions.forEach((region: any, i: number) => {
-      const phrase = phrases[i];
+    if (!isReady) return;
+    const regionMap = regionByPhraseIdRef.current;
+
+    phrases.forEach((phrase, i) => {
+      const region = regionMap.get(phrase.id);
+      if (!region) return;
       const isCurrent = i === currentPhraseIndex;
-      const baseColor = phrase?.excluded ? 'rgba(107, 114, 128, 0.2)' : colors[i % colors.length];
+      const baseColor = phrase.excluded ? EXCLUDED_COLOR : REGION_COLORS[i % REGION_COLORS.length];
       region.setOptions({ color: isCurrent ? '#3b82f680' : baseColor });
     });
   }, [currentPhraseIndex, phrases, isReady]);
