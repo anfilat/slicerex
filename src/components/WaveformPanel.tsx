@@ -10,6 +10,12 @@ import { AudioEngine } from '../audio/audioEngine';
 const REGION_COLORS = ['#3b82f633', '#10b98133', '#f59e0b33', '#ef444433', '#8b5cf633'] as const;
 const EXCLUDED_COLOR = 'rgba(107, 114, 128, 0.2)';
 
+function parsePhraseRegionId(regionId: string): number | null {
+  if (!regionId.startsWith('phrase-')) return null;
+  const phraseId = Number(regionId.replace('phrase-', ''));
+  return Number.isNaN(phraseId) ? null : phraseId;
+}
+
 interface Props {
   engine: AudioEngine;
   phrases: Phrase[];
@@ -127,10 +133,8 @@ export function WaveformPanel({
     if (!rp) return;
 
     const handler = (region: Region) => {
-      const regionId = region.id;
-      if (!regionId.startsWith('phrase-')) return;
-      const phraseId = Number(regionId.replace('phrase-', ''));
-      if (Number.isNaN(phraseId)) return;
+      const phraseId = parsePhraseRegionId(region.id);
+      if (phraseId === null) return;
 
       const phrase = phrasesRef.current.find(p => p.id === phraseId);
       if (!phrase) return;
@@ -148,10 +152,8 @@ export function WaveformPanel({
     if (!rp || !onRegionClick) return;
 
     const handler = (region: Region) => {
-      const regionId = region.id;
-      if (!regionId.startsWith('phrase-')) return;
-      const phraseId = Number(regionId.replace('phrase-', ''));
-      if (Number.isNaN(phraseId)) return;
+      const phraseId = parsePhraseRegionId(region.id);
+      if (phraseId === null) return;
 
       const index = phrasesRef.current.findIndex(p => p.id === phraseId);
       if (index !== -1) onRegionClick(index);
