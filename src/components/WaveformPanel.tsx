@@ -27,6 +27,7 @@ export function WaveformPanel({
   const wsRef = useRef<WaveSurfer | null>(null);
   const regionsPluginRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   // Initialize WaveSurfer once when we have audio data
   useEffect(() => {
@@ -53,12 +54,12 @@ export function WaveformPanel({
     regionsPluginRef.current = regionsPlugin;
     setIsReady(false);
 
-    const loadPromise = ws.load('', [channelData], duration).catch(() => {});
+    setLoadError(false);
 
-    // Mark as ready after audio is loaded
-    loadPromise.then(() => {
-      setIsReady(true);
-    });
+    const loadPromise = ws
+      .load('', [channelData], duration)
+      .then(() => setIsReady(true))
+      .catch(() => setLoadError(true));
 
     return () => {
       wsRef.current = null;
@@ -146,6 +147,16 @@ export function WaveformPanel({
       region.setOptions({ color: isCurrent ? '#3b82f680' : baseColor });
     });
   }, [currentPhraseIndex, phrases, isReady]);
+
+  if (loadError) {
+    return (
+      <div className="mb-4 shrink-0">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          Failed to load waveform. The audio data could not be rendered.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-4 shrink-0">
