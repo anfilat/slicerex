@@ -236,10 +236,13 @@ export default function App() {
       <div className="mb-4 flex items-center gap-3 shrink-0">
         <AudioUploader
           engine={engineRef.current}
-          onLoaded={() => {
-            setAudioLoaded(true);
+          onLoadStart={() => {
+            setAudioLoaded(false);
             setPhrases([]);
             setCurrentPhraseId(null);
+          }}
+          onLoaded={() => {
+            setAudioLoaded(true);
           }}
         />
         {audioLoaded && (
