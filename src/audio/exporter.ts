@@ -23,10 +23,10 @@ export async function exportPhrases(
     a.href = url;
     a.download = fileName;
     a.click();
-    URL.revokeObjectURL(url);
 
     onProgress(i + 1, total);
     await new Promise(r => setTimeout(r, 200));
+    URL.revokeObjectURL(url);
   }
 }
 
