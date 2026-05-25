@@ -77,7 +77,6 @@ export function PhraseCard({
             </span>
             <span className="text-xs text-gray-600">({(phrase.endTime - phrase.startTime).toFixed(1)}s)</span>
           </div>
-          {phrase.transcript && <p className="text-sm text-gray-700 mt-1 truncate">"{phrase.transcript}"</p>}
         </div>
       </div>
       <div className="flex items-center gap-2 pl-11 sm:pl-0">

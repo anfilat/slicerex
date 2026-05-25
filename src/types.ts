@@ -3,25 +3,20 @@ export interface Phrase {
   startTime: number; // seconds
   endTime: number; // seconds
   excluded: boolean; // true = skip on export
-  transcript?: string; // from Whisper, optional
 }
 
 export interface DetectionSettings {
-  method: 'silence' | 'whisper' | 'both';
   silenceThresholdDb: number; // default: -40
-  minSilenceDuration: number; // ms, default: 300
+  minSilenceDuration: number; // ms, default: 1000
   minPhraseDuration: number; // ms, default: 200
   padding: number; // ms, default: 50
-  whisperModel: 'tiny' | 'base' | 'small'; // default: 'base'
 }
 
 export const DEFAULT_SETTINGS: DetectionSettings = {
-  method: 'silence',
   silenceThresholdDb: -40,
   minSilenceDuration: 1000,
   minPhraseDuration: 200,
   padding: 50,
-  whisperModel: 'base',
 };
 
 export interface ExportProgress {

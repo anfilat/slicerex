@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { AudioEngine } from './audio/audioEngine';
 import { detectPhrases } from './audio/silenceDetection';
-import { transcribeWithWhisper } from './audio/whisperTranscription';
 import { exportPhrases } from './audio/exporter';
 import { Phrase, DEFAULT_SETTINGS, DetectionSettings as DetectionSettingsType, ExportProgress } from './types';
 import { usePersistedState } from './hooks/usePersistedState';
@@ -10,7 +9,6 @@ import { DetectionSettings } from './components/DetectionSettings';
 import { PhraseList } from './components/PhraseList';
 import { WaveformPanel } from './components/WaveformPanel';
 import { ExportPanel } from './components/ExportPanel';
-import { WhisperStatus } from './components/WhisperStatus';
 
 export default function App() {
   const engineRef = useRef(new AudioEngine());
@@ -34,11 +32,6 @@ export default function App() {
   const [currentPhraseId, setCurrentPhraseId] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const playSessionRef = useRef(0);
-  const [whisperProgress, setWhisperProgress] = useState<{
-    status: 'idle' | 'loading' | 'transcribing' | 'done' | 'error';
-    progress: number;
-  }>({ status: 'idle', progress: 0 });
-
   const handleRegionClick = (phraseIndex: number) => {
     const phrase = phrases[phraseIndex];
     if (!phrase) return;
@@ -57,65 +50,14 @@ export default function App() {
     if (!engine.buffer) return;
     const channelData = engine.getChannelData();
 
-    if (settings.method === 'silence') {
-      const result = detectPhrases(channelData, engine.buffer.sampleRate, {
-        silenceThresholdDb: settings.silenceThresholdDb,
-        minSilenceDuration: settings.minSilenceDuration,
-        minPhraseDuration: settings.minPhraseDuration,
-        padding: settings.padding,
-      });
-      setPhrases(result);
-      if (result.length > 0) setCurrentPhraseId(result[0].id);
-    } else if (settings.method === 'whisper') {
-      try {
-        const result = await transcribeWithWhisper(channelData, engine.buffer.sampleRate, settings.whisperModel, p =>
-          setWhisperProgress({ status: p.status, progress: p.progress })
-        );
-        setPhrases(result.phrases);
-        if (result.phrases.length > 0) setCurrentPhraseId(result.phrases[0].id);
-      } catch {
-        setWhisperProgress({ status: 'error', progress: 0 });
-        // Fall back to silence detection on error
-        const result = detectPhrases(channelData, engine.buffer.sampleRate, {
-          silenceThresholdDb: settings.silenceThresholdDb,
-          minSilenceDuration: settings.minSilenceDuration,
-          minPhraseDuration: settings.minPhraseDuration,
-          padding: settings.padding,
-        });
-        setPhrases(result);
-        if (result.length > 0) setCurrentPhraseId(result[0].id);
-      }
-    } else {
-      // 'both'
-      // Run silence detection first (instant)
-      const silenceResult = detectPhrases(channelData, engine.buffer.sampleRate, {
-        silenceThresholdDb: settings.silenceThresholdDb,
-        minSilenceDuration: settings.minSilenceDuration,
-        minPhraseDuration: settings.minPhraseDuration,
-        padding: settings.padding,
-      });
-      setPhrases(silenceResult);
-      if (silenceResult.length > 0) setCurrentPhraseId(silenceResult[0].id);
-
-      // Then try Whisper in background for transcripts
-      try {
-        const whisperResult = await transcribeWithWhisper(
-          channelData,
-          engine.buffer.sampleRate,
-          settings.whisperModel,
-          p => setWhisperProgress({ status: p.status, progress: p.progress })
-        );
-        // Enrich silence-detected phrases with transcripts
-        setPhrases(prev =>
-          prev.map((p, i) => ({
-            ...p,
-            transcript: whisperResult.phrases[i]?.transcript,
-          }))
-        );
-      } catch {
-        setWhisperProgress({ status: 'error', progress: 0 });
-      }
-    }
+    const result = detectPhrases(channelData, engine.buffer.sampleRate, {
+      silenceThresholdDb: settings.silenceThresholdDb,
+      minSilenceDuration: settings.minSilenceDuration,
+      minPhraseDuration: settings.minPhraseDuration,
+      padding: settings.padding,
+    });
+    setPhrases(result);
+    if (result.length > 0) setCurrentPhraseId(result[0].id);
   };
 
   const handlePlay = async (phrase: Phrase) => {
@@ -261,7 +203,6 @@ export default function App() {
       {audioLoaded && (
         <>
           <DetectionSettings settings={settings} onChange={setSettings} />
-          <WhisperStatus status={whisperProgress.status} progress={whisperProgress.progress} />
           {phrases.length > 0 && (
             <WaveformPanel
               engine={engineRef.current}
