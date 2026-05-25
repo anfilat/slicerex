@@ -40,7 +40,11 @@ function encodePhraseToMp3(audioData: Float32Array, sampleRate: number, phrase: 
     const endSample = Math.floor(phrase.endTime * sampleRate);
 
     worker.onmessage = e => {
-      resolve(e.data.blob as Blob);
+      if (e.data.error) {
+        reject(new Error(e.data.error));
+      } else {
+        resolve(e.data.blob as Blob);
+      }
       worker.terminate();
     };
     worker.onerror = err => {
