@@ -3,6 +3,7 @@ import { AudioEngine } from './audio/audioEngine';
 import { detectPhrases } from './audio/silenceDetection';
 import { exportPhrases } from './audio/exporter';
 import { Phrase, DEFAULT_SETTINGS, DetectionSettings as DetectionSettingsType, ExportProgress } from './types';
+import { mergePhrase, splitPhrase, toggleExclude } from './audio/phraseMutations';
 import { usePersistedState } from './hooks/usePersistedState';
 import { AudioUploader } from './components/AudioUploader';
 import { DetectionSettings } from './components/DetectionSettings';
@@ -94,64 +95,25 @@ export default function App() {
   };
 
   const handleMerge = (id: number) => {
-    const idx = phrases.findIndex(p => p.id === id);
-    if (idx === -1 || idx === phrases.length - 1) return;
-
-    const current = phrases[idx];
-    const next = phrases[idx + 1];
-
-    // Create merged phrase
-    const merged: Phrase = {
-      id: Math.max(...phrases.map(p => p.id)) + 1,
-      startTime: current.startTime,
-      endTime: next.endTime,
-      excluded: current.excluded && next.excluded,
-    };
-
-    // Remove both phrases and add merged one
-    const newPhrases = [...phrases];
-    newPhrases.splice(idx, 2, merged);
-    setPhrases(newPhrases);
-
-    if (currentPhraseId === id || currentPhraseId === next.id) {
-      setCurrentPhraseId(merged.id);
+    const result = mergePhrase(phrases, id);
+    if (!result) return;
+    setPhrases(result.phrases);
+    if (currentPhraseId !== null && result.mergedFromIds.includes(currentPhraseId)) {
+      setCurrentPhraseId(result.mergedId);
     }
   };
 
   const handleSplit = (id: number) => {
-    const idx = phrases.findIndex(p => p.id === id);
-    if (idx === -1) return;
-
-    const phrase = phrases[idx];
-    const midPoint = (phrase.startTime + phrase.endTime) / 2;
-
-    // Create two new phrases
-    const maxId = Math.max(...phrases.map(p => p.id));
-    const first: Phrase = {
-      ...phrase,
-      id: maxId + 1,
-      startTime: phrase.startTime,
-      endTime: midPoint,
-    };
-    const second: Phrase = {
-      ...phrase,
-      id: maxId + 2,
-      startTime: midPoint,
-      endTime: phrase.endTime,
-    };
-
-    // Replace original phrase with two new ones
-    const newPhrases = [...phrases];
-    newPhrases.splice(idx, 1, first, second);
-    setPhrases(newPhrases);
-
-    if (currentPhraseId === id) {
-      setCurrentPhraseId(first.id);
+    const result = splitPhrase(phrases, id);
+    if (!result) return;
+    setPhrases(result.phrases);
+    if (currentPhraseId === result.originalId) {
+      setCurrentPhraseId(result.firstHalfId);
     }
   };
 
   const handleToggleExclude = (id: number) => {
-    setPhrases(phrases.map(p => (p.id === id ? { ...p, excluded: !p.excluded } : p)));
+    setPhrases(toggleExclude(phrases, id));
   };
 
   const handlePhraseBoundaryChange = (id: number, startTime: number, endTime: number) => {

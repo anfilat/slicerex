@@ -1,5 +1,24 @@
 import { Phrase } from '../types';
 
+export interface ExportItem {
+  phrase: Phrase;
+  startSample: number;
+  endSample: number;
+  fileName: string;
+}
+
+/** Compute export plan: filter excluded phrases, calculate sample boundaries, generate filenames. */
+export function getExportItems(phrases: Phrase[], sampleRate: number, filePrefix: string): ExportItem[] {
+  return phrases
+    .filter(p => !p.excluded)
+    .map((phrase, i) => ({
+      phrase,
+      startSample: Math.floor(phrase.startTime * sampleRate),
+      endSample: Math.floor(phrase.endTime * sampleRate),
+      fileName: `${filePrefix}_${String(i + 1).padStart(2, '0')}.mp3`,
+    }));
+}
+
 export async function exportPhrases(
   audioData: Float32Array,
   sampleRate: number,
@@ -7,17 +26,14 @@ export async function exportPhrases(
   filePrefix: string,
   onProgress: (current: number, total: number) => void
 ): Promise<void> {
-  // Export each non-excluded phrase individually
-  const phrasesToExport = phrases.filter(p => !p.excluded);
-  const total = phrasesToExport.length;
+  const items = getExportItems(phrases, sampleRate, filePrefix);
+  const total = items.length;
   onProgress(0, total);
 
-  for (let i = 0; i < phrasesToExport.length; i++) {
-    const phrase = phrasesToExport[i];
-    const blob = await encodePhraseToMp3(audioData, sampleRate, phrase);
+  for (let i = 0; i < items.length; i++) {
+    const { startSample, endSample, fileName } = items[i];
+    const blob = await encodeSegmentToMp3(audioData, sampleRate, startSample, endSample);
 
-    const num = String(i + 1).padStart(2, '0');
-    const fileName = `${filePrefix}_${num}.mp3`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -30,14 +46,17 @@ export async function exportPhrases(
   }
 }
 
-function encodePhraseToMp3(audioData: Float32Array, sampleRate: number, phrase: Phrase): Promise<Blob> {
+function encodeSegmentToMp3(
+  audioData: Float32Array,
+  sampleRate: number,
+  startSample: number,
+  endSample: number
+): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL('./mp3Encoder.worker.ts', import.meta.url), {
       type: 'module',
     });
 
-    const startSample = Math.floor(phrase.startTime * sampleRate);
-    const endSample = Math.floor(phrase.endTime * sampleRate);
     const segment = audioData.slice(startSample, endSample);
 
     worker.onmessage = e => {
