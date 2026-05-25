@@ -25,6 +25,7 @@ export function AudioUploader({ engine, onLoadStart, onLoaded }: Props) {
       setError(err instanceof Error ? err.message : 'Failed to load audio file');
     } finally {
       setLoading(false);
+      e.target.value = '';
     }
   };
 
