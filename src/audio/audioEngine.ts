@@ -49,10 +49,10 @@ export class AudioEngine {
   }
 
   playSegment(start: number, end: number): Promise<void> {
+    this.stop();
     const id = ++this.playbackId;
 
     return new Promise(resolve => {
-      this.stop();
       if (!this.audioContext || !this.audioBuffer) return resolve();
 
       const sourceNode = this.audioContext.createBufferSource();
