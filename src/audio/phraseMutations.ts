@@ -41,18 +41,8 @@ export function splitPhrase(
   const midPoint = (phrase.startTime + phrase.endTime) / 2;
 
   const maxId = Math.max(...phrases.map(p => p.id));
-  const first: Phrase = {
-    ...phrase,
-    id: maxId + 1,
-    startTime: phrase.startTime,
-    endTime: midPoint,
-  };
-  const second: Phrase = {
-    ...phrase,
-    id: maxId + 2,
-    startTime: midPoint,
-    endTime: phrase.endTime,
-  };
+  const first: Phrase = { ...phrase, id: maxId + 1, endTime: midPoint };
+  const second: Phrase = { ...phrase, id: maxId + 2, startTime: midPoint };
 
   const newPhrases = [...phrases];
   newPhrases.splice(idx, 1, first, second);
