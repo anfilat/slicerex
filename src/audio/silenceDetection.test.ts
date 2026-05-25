@@ -142,4 +142,87 @@ describe('detectPhrases', () => {
     });
     expect(phrases).toHaveLength(0);
   });
+
+  it('returns single phrase when all audio is loud (no silence)', () => {
+    const audio = createTestAudio(sampleRate, [{ durationMs: 2000, amplitude: 0.5 }]);
+    const phrases = detectPhrases(audio, sampleRate, {
+      silenceThresholdDb: -40,
+      minSilenceDuration: 300,
+      minPhraseDuration: 200,
+      padding: 0,
+    });
+    expect(phrases).toHaveLength(1);
+    expect(phrases[0].startTime).toBeCloseTo(0, 1);
+    expect(phrases[0].endTime).toBeCloseTo(2, 1);
+  });
+
+  it('returns single phrase with very low threshold (nothing is silent)', () => {
+    // All-loud audio — no silence gaps at all
+    const audio = createTestAudio(sampleRate, [
+      { durationMs: 500, amplitude: 0.5 },
+      { durationMs: 400, amplitude: 0.01 }, // very quiet but still above -100 dB threshold
+      { durationMs: 500, amplitude: 0.5 },
+    ]);
+    detectPhrases(audio, sampleRate, {
+      silenceThresholdDb: -40,
+      minSilenceDuration: 300,
+      minPhraseDuration: 200,
+      padding: 0,
+    });
+    // The 0.01 amplitude segment has RMS ≈ 0.007 ≈ -43 dB, below -40 dB threshold
+    // So it's still classified as silence and we get 2 phrases.
+    // With -100 dB threshold, even 0.01 amplitude exceeds it, so one phrase.
+    const phrasesLowThreshold = detectPhrases(audio, sampleRate, {
+      silenceThresholdDb: -100,
+      minSilenceDuration: 300,
+      minPhraseDuration: 200,
+      padding: 0,
+    });
+    expect(phrasesLowThreshold).toHaveLength(1);
+  });
+
+  it('returns empty array with very high threshold (everything is silent)', () => {
+    const audio = createTestAudio(sampleRate, [{ durationMs: 2000, amplitude: 0.5 }]);
+    const phrases = detectPhrases(audio, sampleRate, {
+      silenceThresholdDb: 0,
+      minSilenceDuration: 300,
+      minPhraseDuration: 200,
+      padding: 0,
+    });
+    // With 0 dB threshold, everything is classified as silent
+    expect(phrases).toHaveLength(0);
+  });
+
+  it('handles audio shorter than one analysis window', () => {
+    // Window is 50ms, so 20ms audio is shorter than one window
+    const audio = createTestAudio(sampleRate, [{ durationMs: 20, amplitude: 0.5 }]);
+    const phrases = detectPhrases(audio, sampleRate, {
+      silenceThresholdDb: -40,
+      minSilenceDuration: 300,
+      minPhraseDuration: 0,
+      padding: 0,
+    });
+    // No analysis windows fit, so isSilent is empty, no silence regions,
+    // entire audio is treated as one phrase
+    expect(phrases).toHaveLength(1);
+    expect(phrases[0].startTime).toBe(0);
+    expect(phrases[0].endTime).toBeCloseTo(0.02, 2);
+  });
+
+  it('handles trailing silence correctly', () => {
+    const audio = createTestAudio(sampleRate, [
+      { durationMs: 500, amplitude: 0.5 },
+      { durationMs: 1000, amplitude: 0 },
+    ]);
+    const phrases = detectPhrases(audio, sampleRate, {
+      silenceThresholdDb: -40,
+      minSilenceDuration: 300,
+      minPhraseDuration: 200,
+      padding: 0,
+    });
+    expect(phrases).toHaveLength(1);
+    // Phrase should end where the trailing silence begins
+    expect(phrases[0].startTime).toBeCloseTo(0, 1);
+    expect(phrases[0].endTime).toBeLessThan(0.6);
+  });
 });
