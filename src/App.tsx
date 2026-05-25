@@ -47,15 +47,12 @@ export default function App() {
     if (!engine.buffer) return;
     const channelData = engine.getChannelData();
 
-    const result = detectPhrases(channelData, engine.buffer.sampleRate, {
-      silenceThresholdDb: settings.silenceThresholdDb,
-      minSilenceDuration: settings.minSilenceDuration,
-      minPhraseDuration: settings.minPhraseDuration,
-      padding: settings.padding,
-    });
+    const result = detectPhrases(channelData, engine.buffer.sampleRate, settings);
     setPhrases(result);
     if (result.length > 0) setCurrentPhraseId(result[0].id);
   };
+
+  const currentPhraseIndex = currentPhraseId !== null ? phrases.findIndex(p => p.id === currentPhraseId) : -1;
 
   const handlePlay = async (phrase: Phrase) => {
     setCurrentPhraseId(phrase.id);
@@ -84,10 +81,8 @@ export default function App() {
   };
 
   const handlePlayNext = () => {
-    if (phrases.length === 0) return;
-    const idx = currentPhraseId !== null ? phrases.findIndex(p => p.id === currentPhraseId) : -1;
-    if (idx === -1 || idx === phrases.length - 1) return;
-    handlePlay(phrases[idx + 1]);
+    if (currentPhraseIndex < 0 || currentPhraseIndex >= phrases.length - 1) return;
+    handlePlay(phrases[currentPhraseIndex + 1]);
   };
 
   const handleMerge = (id: number) => {
@@ -166,7 +161,7 @@ export default function App() {
               engine={engineRef.current}
               phrases={phrases}
               scrollToPhrase={scrollToPhrase}
-              currentPhraseIndex={currentPhraseId !== null ? phrases.findIndex(p => p.id === currentPhraseId) : -1}
+              currentPhraseIndex={currentPhraseIndex}
               onPhraseBoundaryChange={handlePhraseBoundaryChange}
               onRegionClick={handleRegionClick}
             />
@@ -176,6 +171,7 @@ export default function App() {
               phrases={phrases}
               highlightedId={highlightedId}
               currentPhraseId={currentPhraseId}
+              currentPhraseIndex={currentPhraseIndex}
               scrollToPhrase={scrollToPhrase}
               isPlaying={isPlaying}
               onPlay={handlePlay}

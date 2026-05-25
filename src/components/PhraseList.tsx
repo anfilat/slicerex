@@ -5,6 +5,7 @@ interface Props {
   phrases: Phrase[];
   highlightedId: number | null;
   currentPhraseId: number | null;
+  currentPhraseIndex: number;
   scrollToPhrase: number | null;
   isPlaying: boolean;
   onPlay: (phrase: Phrase) => void;
@@ -22,6 +23,7 @@ export function PhraseList({
   phrases,
   highlightedId,
   currentPhraseId,
+  currentPhraseIndex,
   scrollToPhrase,
   isPlaying,
   onPlay,
@@ -38,8 +40,7 @@ export function PhraseList({
     return <p className="text-gray-600">No phrases detected yet.</p>;
   }
 
-  const currentIdx = currentPhraseId !== null ? phrases.findIndex(p => p.id === currentPhraseId) : -1;
-  const canPlayNext = currentIdx >= 0 && currentIdx < phrases.length - 1;
+  const canPlayNext = currentPhraseIndex >= 0 && currentPhraseIndex < phrases.length - 1;
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
