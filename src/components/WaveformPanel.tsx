@@ -210,7 +210,6 @@ export function WaveformPanel({
         >
           {editMode ? '✏️ Редактирование' : '🔒 Редактирование'}
         </button>
-        {editMode && <span className="text-xs text-gray-500">Перетаскивайте границы фраз</span>}
       </div>
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <div ref={containerRef} className="bg-white" />
