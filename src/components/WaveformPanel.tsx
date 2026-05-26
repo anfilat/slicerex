@@ -41,6 +41,7 @@ export function WaveformPanel({
   phrasesRef.current = phrases;
   const [isReady, setIsReady] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   // Initialize WaveSurfer once when we have audio data
   useEffect(() => {
@@ -110,6 +111,7 @@ export function WaveformPanel({
           start: phrase.startTime,
           end: phrase.endTime,
           color,
+          resize: editMode,
           content: `#${i + 1}`,
         });
       } else {
@@ -119,13 +121,13 @@ export function WaveformPanel({
           end: phrase.endTime,
           color,
           drag: false,
-          resize: true,
+          resize: editMode,
           content: `#${i + 1}`,
         });
         regionMap.set(phrase.id, region);
       }
     });
-  }, [phrases, isReady]);
+  }, [phrases, isReady, editMode]);
 
   // Handle region resize — uses ref to avoid stale closures and resubscription
   useEffect(() => {
@@ -198,6 +200,18 @@ export function WaveformPanel({
 
   return (
     <div className="mb-4 shrink-0">
+      <div className="mb-2 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setEditMode(prev => !prev)}
+          className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
+            editMode ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          {editMode ? '✏️ Редактирование' : '🔒 Редактирование'}
+        </button>
+        {editMode && <span className="text-xs text-gray-500">Перетаскивайте границы фраз</span>}
+      </div>
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <div ref={containerRef} className="bg-white" />
       </div>
