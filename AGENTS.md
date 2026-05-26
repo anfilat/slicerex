@@ -22,13 +22,13 @@ Run a single test: `npx vitest run src/audio/silenceDetection.test.ts`
 
 Browser-based audio phrase splitter. No backend — everything runs client-side.
 
-**Data flow:** Upload audio → decode to AudioBuffer → detect phrases (silence-based) → edit in UI (merge/split/exclude/adjust boundaries) → export as MP3 files.
+**Data flow:** Upload audio → decode to AudioBuffer → detect phrases (silence-based, runs in a Web Worker) → edit in UI (merge/split/exclude/adjust boundaries) → export as MP3 files.
 
 **State management** is centralized in `src/App.tsx` via React hooks. The `AudioEngine` instance lives in a ref and persists across renders (with `destroy()` cleanup on unmount). All phrase state (`Phrase[]`) flows down to components via props; user actions flow up via callbacks.
 
 **Three layers:**
 
-- `src/audio/` — Pure audio logic (no React). `AudioEngine` wraps Web Audio API (decode, play, getChannelData for mono Float32Array with caching). `silenceDetection` is a pure function `detectPhrases(audioData, sampleRate, config) → Phrase[]`. `phraseMutations` provides pure functions `mergePhrase`, `splitPhrase`, `toggleExclude` for phrase editing. MP3 encoding runs in a Web Worker (`mp3Encoder.worker.ts`) via `lamejs` to avoid blocking the UI.
+- `src/audio/` — Pure audio logic (no React). `AudioEngine` wraps Web Audio API (decode, play, getChannelData for mono Float32Array with caching). `silenceDetection` is a pure function `detectPhrases(audioData, sampleRate, config) → Phrase[]` that runs inside a Web Worker (`silenceDetection.worker.ts`) to avoid blocking the UI on large files. `phraseMutations` provides pure functions `mergePhrase`, `splitPhrase`, `toggleExclude` for phrase editing. MP3 encoding runs in a Web Worker (`mp3Encoder.worker.ts`) via `lamejs`.
 - `src/components/` — React UI. `WaveformPanel` integrates WaveSurfer.js v7 with Regions, Zoom, and Timeline plugins for interactive waveform with draggable phrase boundaries. Bidirectional sync: dragging a region boundary updates the phrase list, and merging/excluding phrases updates the waveform regions.
 - `src/types.ts` — Core data model. `Phrase` has `id`, `startTime`, `endTime`, and `excluded`.
 
@@ -38,8 +38,10 @@ Browser-based audio phrase splitter. No backend — everything runs client-side.
 
 ## Key Design Decisions
 
-- Workers are ES module workers (`{ type: 'module' }`), configured in `vite.config.ts` with `worker: { format: 'es' }`.
+- Workers are ES module workers (`{ type: 'module' }`), configured in `vite.config.ts` with `worker: { format: 'es' }`. There are two workers: `mp3Encoder.worker.ts` for export and `silenceDetection.worker.ts` for phrase detection.
 - `AudioEngine.getChannelData()` caches the mono downmix to avoid reallocating large buffers on repeated calls.
+- `App.tsx` manages a single `detectionWorkerRef` — the worker is terminated on unmount and when a new detection starts, preventing stale results.
+- Loading states (`uploadLoading`, `detecting`) use an animated dots indicator (`Loading audio...` / `Detecting phrases...`) in the info line below buttons, keeping button labels stable to avoid layout shifts.
 - `AudioEngine.playSegment()` uses a `playbackId` counter to prevent race conditions from rapid play/stop clicks, plus a safety timeout for browsers where `onended` may not fire.
 - `phraseMutations.ts` is a pure module (no React) so merge/split/toggle logic can be tested independently.
 - `usePersistedState` hook persists detection settings to `localStorage` with graceful fallback if storage is unavailable.

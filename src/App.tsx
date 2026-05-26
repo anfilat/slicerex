@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { AudioEngine } from './audio/audioEngine';
-import { detectPhrases } from './audio/silenceDetection';
 import { exportPhrases } from './audio/exporter';
 import { Phrase, DEFAULT_SETTINGS, DetectionSettings as DetectionSettingsType, ExportProgress } from './types';
+import silenceDetectionWorker from './audio/silenceDetection.worker?worker';
 import { mergePhrase, splitPhrase, toggleExclude } from './audio/phraseMutations';
 import { usePersistedState } from './hooks/usePersistedState';
 import { DetectionSettings } from './components/DetectionSettings';
@@ -14,6 +14,10 @@ export default function App() {
   const engineRef = useRef(new AudioEngine());
   const [audioLoaded, setAudioLoaded] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [detecting, setDetecting] = useState(false);
+  const loading = uploadLoading || detecting;
+  const [dots, setDots] = useState(1);
+  const detectionWorkerRef = useRef<Worker | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [phrases, setPhrases] = useState<Phrase[]>([]);
@@ -28,9 +32,16 @@ export default function App() {
 
   useEffect(() => {
     return () => {
+      terminateDetectionWorker();
       engineRef.current.destroy();
     };
   }, []);
+
+  useEffect(() => {
+    if (!loading) return;
+    const id = setInterval(() => setDots(d => (d % 3) + 1), 400);
+    return () => clearInterval(id);
+  }, [loading]);
 
   const handleRegionClick = (phraseIndex: number) => {
     const phrase = phrases[phraseIndex];
@@ -64,14 +75,40 @@ export default function App() {
     }
   };
 
-  const handleDetect = async () => {
+  const terminateDetectionWorker = () => {
+    detectionWorkerRef.current?.terminate();
+    detectionWorkerRef.current = null;
+  };
+
+  const handleDetect = () => {
     const engine = engineRef.current;
     if (!engine.buffer) return;
     const channelData = engine.getChannelData();
 
-    const result = detectPhrases(channelData, engine.buffer.sampleRate, settings);
-    setPhrases(result);
-    if (result.length > 0) setCurrentPhraseId(result[0].id);
+    terminateDetectionWorker();
+    const worker = new silenceDetectionWorker();
+    detectionWorkerRef.current = worker;
+
+    setDetecting(true);
+
+    worker.onmessage = (e: MessageEvent<{ phrases: Phrase[] }>) => {
+      const { phrases: result } = e.data;
+      setPhrases(result);
+      if (result.length > 0) setCurrentPhraseId(result[0].id);
+      setDetecting(false);
+      terminateDetectionWorker();
+    };
+
+    worker.onerror = () => {
+      setDetecting(false);
+      terminateDetectionWorker();
+    };
+
+    worker.postMessage({
+      audioData: channelData,
+      sampleRate: engine.buffer.sampleRate,
+      config: settings,
+    });
   };
 
   const currentPhraseIndex = currentPhraseId !== null ? phrases.findIndex(p => p.id === currentPhraseId) : -1;
@@ -158,7 +195,7 @@ export default function App() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => fileInputRef.current?.click()}
-            disabled={uploadLoading}
+            disabled={loading}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white disabled:opacity-50"
           >
             {uploadLoading ? 'Loading...' : 'Upload audio file'}
@@ -167,15 +204,20 @@ export default function App() {
           {audioLoaded && (
             <button
               onClick={handleDetect}
+              disabled={detecting}
               className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white disabled:opacity-50"
             >
-              Detect phrases
+              {detecting ? 'Detecting...' : 'Detect phrases'}
             </button>
           )}
         </div>
         <div className="mt-1 text-sm h-5">
           {uploadError && <span className="text-red-600">{uploadError}</span>}
-          {!uploadError && audioLoaded && (
+          {!uploadError && detecting && <span className="text-gray-500">{`Detecting phrases${'.'.repeat(dots)}`}</span>}
+          {!uploadError && !detecting && uploadLoading && (
+            <span className="text-gray-500">{`Loading audio${'.'.repeat(dots)}`}</span>
+          )}
+          {!uploadError && !detecting && audioLoaded && !uploadLoading && (
             <span className="text-gray-500">
               {engineRef.current.fileName} ({Math.round(engineRef.current.duration)}s)
             </span>
