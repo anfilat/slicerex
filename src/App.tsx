@@ -5,7 +5,6 @@ import { exportPhrases } from './audio/exporter';
 import { Phrase, DEFAULT_SETTINGS, DetectionSettings as DetectionSettingsType, ExportProgress } from './types';
 import { mergePhrase, splitPhrase, toggleExclude } from './audio/phraseMutations';
 import { usePersistedState } from './hooks/usePersistedState';
-import { AudioUploader } from './components/AudioUploader';
 import { DetectionSettings } from './components/DetectionSettings';
 import { PhraseList } from './components/PhraseList';
 import { WaveformPanel } from './components/WaveformPanel';
@@ -14,12 +13,9 @@ import { ExportPanel } from './components/ExportPanel';
 export default function App() {
   const engineRef = useRef(new AudioEngine());
   const [audioLoaded, setAudioLoaded] = useState(false);
-
-  useEffect(() => {
-    return () => {
-      engineRef.current.destroy();
-    };
-  }, []);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [phrases, setPhrases] = useState<Phrase[]>([]);
   const [settings, setSettings] = usePersistedState<DetectionSettingsType>('detectionSettings', DEFAULT_SETTINGS);
   const [exportProgress, setExportProgress] = useState<ExportProgress>({ status: 'idle' });
@@ -29,6 +25,13 @@ export default function App() {
   const [currentPhraseId, setCurrentPhraseId] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const playSessionRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      engineRef.current.destroy();
+    };
+  }, []);
+
   const handleRegionClick = (phraseIndex: number) => {
     const phrase = phrases[phraseIndex];
     if (!phrase) return;
@@ -40,6 +43,25 @@ export default function App() {
 
   const handlePhraseSelect = (index: number) => {
     setScrollToPhrase(index);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadLoading(true);
+    setUploadError(null);
+    setAudioLoaded(false);
+    setPhrases([]);
+    setCurrentPhraseId(null);
+    try {
+      await engineRef.current.loadFile(file);
+      setAudioLoaded(true);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Failed to load audio file');
+    } finally {
+      setUploadLoading(false);
+      e.target.value = '';
+    }
   };
 
   const handleDetect = async () => {
@@ -132,26 +154,33 @@ export default function App() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 text-gray-900 p-6 max-w-5xl mx-auto overflow-hidden">
-      <div className="mb-4 flex items-center gap-3 shrink-0">
-        <AudioUploader
-          engine={engineRef.current}
-          onLoadStart={() => {
-            setAudioLoaded(false);
-            setPhrases([]);
-            setCurrentPhraseId(null);
-          }}
-          onLoaded={() => {
-            setAudioLoaded(true);
-          }}
-        />
-        {audioLoaded && (
+      <div className="mb-4 shrink-0">
+        <div className="flex items-center gap-3">
           <button
-            onClick={handleDetect}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white disabled:opacity-50"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadLoading}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white disabled:opacity-50"
           >
-            Detect phrases
+            {uploadLoading ? 'Loading...' : 'Upload audio file'}
           </button>
-        )}
+          <input ref={fileInputRef} type="file" accept="audio/*" onChange={handleFileUpload} className="hidden" />
+          {audioLoaded && (
+            <button
+              onClick={handleDetect}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white disabled:opacity-50"
+            >
+              Detect phrases
+            </button>
+          )}
+        </div>
+        <div className="mt-1 text-sm h-5">
+          {uploadError && <span className="text-red-600">{uploadError}</span>}
+          {!uploadError && audioLoaded && (
+            <span className="text-gray-500">
+              {engineRef.current.fileName} ({Math.round(engineRef.current.duration)}s)
+            </span>
+          )}
+        </div>
       </div>
       {audioLoaded && (
         <>
